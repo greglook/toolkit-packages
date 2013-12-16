@@ -1,0 +1,127 @@
+#!/usr/bin/ruby
+
+# This script collects numeric values into buckets and prints out a histogram
+# of the value distribution. There are a few options to automatically generate
+# bucket boundaries, or arbitrary ones may be specified as arguments. Buckets
+# do not need to be equal width. Additionally, any values falling out of the
+# defined range will be captured in two virtual buckets.
+#
+#  histogram -n 10 -w 5
+# 10 buckets from 0.0 to 50.0 in intervals of 5.0
+#
+#  histogram -n 20 100.0
+# 20 buckets from 0.0 to 100.0 in intervals of 5.0
+#
+#  histogram -w 25 100 1000
+# 36 buckets from 100.0 to 1000.0 in intervals of 25.0
+#
+#  histogram 1 7 30 90 365
+# 4 buckets from 1.0 to 365.0 in varying intervals
+#
+# Author:: Greg Look
+
+require 'optparse'
+
+
+# histogram specification
+$lower_bound = 0.0
+$upper_bound = nil
+$boundaries = nil
+
+# display options
+$precision = 0
+$bar_length = 60
+
+# helper method to abort the script
+def fail(msg)
+  puts msg
+  exit 1
+end
+
+# parse command-line options
+options = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] [boundary ...]"
+  opts.on('-w', '--width VALUE', "Width of each histogram bucket") {|v| $width = v.to_f; fail "Bucket width must be positive" unless $width > 0.0 }
+  opts.on('-n', '--count N', "Number of histogram buckets") {|v| $count = v.to_i; fail "Bucket count must be positive" unless $count > 0 }
+  opts.on('-p', '--precision N', "Boundary display precision (default: #{$precision})") {|v| $precision = v.to_i }
+  opts.on('-b', '--bar-length N', "Length of longest histogram bar (default: #{$bar_length})") {|v| $bar_length = v.to_i }
+  opts.on('-h', '--help', "Print these options") { puts opts; exit }
+end
+options.parse!
+
+if $width.nil? and $count.nil? and ARGV.empty?
+  puts options
+  exit 1
+end
+
+$precision = 0 if $precision < 0
+$bar_length = 1 if $bar_length < 1
+
+# convert remaining arguments to boundaries
+$boundaries = ARGV.map{|v| v.to_f }
+$upper_bound = $boundaries.max unless $boundaries.empty?
+if $boundaries.size > 1
+  $lower_bound = $boundaries.min
+else
+  $boundaries << $lower_bound
+end
+
+# generate boundary list
+if $upper_bound
+  if $width or $count
+    hist_width = $upper_bound - $lower_bound
+    bucket_width = $width || hist_width/$count
+    bucket_count = (hist_width/bucket_width).floor
+    bucket_count = $count if $count && bucket_count > $count
+    (bucket_count - 1).times {|i| $boundaries << ($lower_bound + (i+1)*bucket_width) }
+  end
+else
+  fail "Not enough information to generate bucket boundaries" unless $width and $count
+  $upper_bound = $width*$count
+  $count.times {|i| $boundaries << ($lower_bound + (i+1)*$width) }
+end
+
+$boundaries.sort!.uniq!
+
+# generate frequency array
+$histogram = Hash.new(0)
+$total = 0
+
+# process input
+while line = STDIN.gets
+  next unless line.strip! =~ /^[+-]?\d+\.?\d*$/
+  $total += 1
+
+  value = line.to_f
+  boundary = (1..$boundaries.size).detect {|i| value < $boundaries[i-1] }
+  bucket = case boundary
+    when nil then :over
+    when 1 then :under
+    else boundary - 2
+  end
+  $histogram[bucket] += 1
+end
+
+# display results
+unless $total == 0
+  space = lambda {|v| 1 + (Math.log(v)/Math.log(10)).floor }
+  boundary_width = [space[$upper_bound] + 1 + (($precision > 0) && ($precision + 1) || 0), "Value".size].max
+  count_width = [space[$total], "Count".size].max
+
+  puts "%#{boundary_width+1}s  %#{count_width}s   Frequency" % ["Value".center(boundary_width), "Count".center(count_width)]
+  format = "%#{boundary_width}s | %#{count_width}d |  %6.2f%%  | %s"
+
+  entries = (1..($boundaries.size-1)).map{|i| ["%.#{$precision}f" % $boundaries[i-1], $histogram[i-1], $histogram[i-1].to_f/$total] }
+  entries.unshift ["<%.#{$precision}f" % $lower_bound, $histogram[:under], $histogram[:under].to_f/$total]
+  entries << [">%.#{$precision}f" % $upper_bound, $histogram[:over], $histogram[:over].to_f/$total]
+
+  entries.shift while entries.first && entries.first[1] == 0
+  entries.pop while entries.last && entries.last[1] == 0
+
+  max_pct = entries.map{|e| e[2] }.max
+
+  entries.each do |entry|
+    bar = ($bar_length*entry[2]/max_pct).ceil
+    puts format % [entry[0], entry[1], 100*entry[2], '#'*bar]
+  end
+end

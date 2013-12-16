@@ -1,0 +1,15 @@
+# do not bell on tab-completion
+set bell-style none
+
+# handle non-latin characters
+set meta-flag on
+set input-meta on
+set convert-meta off
+set output-meta on
+
+# completed names which are symbolic links to
+# directories have a slash appended.
+set mark-symlinked-directories on
+
+# don't match .svn, etc with tab-completion
+set match-hidden-files off

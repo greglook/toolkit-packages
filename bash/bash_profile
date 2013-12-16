@@ -1,0 +1,10 @@
+# ~/.bash_profile
+# This file is sourced by bash for login shells.
+
+# source the system-wide bashrc
+[[ -f /etc/bash/bashrc ]] && source /etc/bash/bashrc
+[[ -f /etc/bashrc ]] && source /etc/bashrc
+
+# source the user's bashrc
+[[ -f ~/.bashrc ]] && source ~/.bashrc
+

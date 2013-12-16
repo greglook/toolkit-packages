@@ -1,0 +1,11 @@
+# Z-shell login configuration. This file is sourced only for login shells and
+# should perform any one-time setup neccessary when the user logs in. This file
+# is loaded *after* runtime configuration files.
+#
+# Modular configuration should be placed in the ~/.zsh/login.d/ directory.
+# vim: ft=zsh
+
+##### LOGIN MODULES #####
+
+# load additional configuration
+load_configs "$HOME/.zsh/login.d"

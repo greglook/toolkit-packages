@@ -1,0 +1,7 @@
+# Global list of files to ignore.
+
+# OS X
+._*
+.DS_Store
+.DS_Store?
+.Trashes

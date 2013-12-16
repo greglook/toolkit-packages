@@ -1,0 +1,27 @@
+[user]
+    name = Greg Look
+    email = greg@greg-look.net
+    signingkey = DE013B39
+
+[core]
+    pager = less
+    editor = vim
+    excludesfile = ~/.gitignore-global
+
+[alias]
+    co = checkout
+    ci = commit
+    st = status
+    la = log --color --graph --date=short --pretty=\"format:%ad %Cred%h%C(bold yellow)%d%Creset %s %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset\"
+
+[color]
+    branch = auto
+    diff = auto
+    interactive = auto
+    status = auto
+
+[push]
+    default = simple
+
+[diff]
+    patience = true

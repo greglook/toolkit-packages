@@ -1,0 +1,21 @@
+# Z-shell login configuration. This file is sourced only for login shells and
+# should perform any one-time setup neccessary when the user logs in. This file
+# is loaded *before* runtime configuration files.
+#
+# Modular configuration should be placed in the ~/.zsh/profile.d/ directory.
+# vim: ft=zsh
+
+##### LOGIN MODULES #####
+
+# load additional configuration
+load_configs "$HOME/.zsh/profile.d"
+
+# prefer executables in ~/bin
+local bin_dir="$HOME/bin"
+[[ -d $bin_dir ]] && path=($bin_dir $path)
+
+# ensure path only contains unique entries
+typeset -U path
+
+# block loading of global RC file
+unsetopt global_rcs

@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# use current kernel version if none provided
+KERNEL=${1:-$(uname -r)}
+
+find /lib/modules/$KERNEL/ -type f -iname '*.o' -or -iname '*.ko' | ruby -lne 'puts $1 if /^(?:\/[^\/]+){3}\/(.+)\.k?o$/' | sort

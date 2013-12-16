@@ -1,0 +1,27 @@
+# ~/.bashrc
+# This file is sourced by bash for all interactive shells.
+
+# test for interactive shell.
+[[ $- != *i* ]] && return
+
+# add ~/bin to $PATH
+[[ -d $HOME/bin ]] && export PATH="$HOME/bin:$PATH"
+
+# ls with color
+alias ls='ls --color=tty'
+
+# ignore common commands in history
+export HISTIGNORE=$'[ \t]*:&:[fb]g:exit:ls'
+
+# make bash history play nicely with multiple terminals
+shopt -s histappend
+
+# set command prompt
+if [[ $USER == "root" ]]; then
+    export PS1="\[\033[01;31m\]\h \[\033[01;34m\]\W #\[\033[00m\] "
+else
+    export PS1="\[\033[01;32m\]\u\[\033[01;34m\]@\[\033[01;31m\]\h \[\033[01;34m\]\W \$\[\033[00m\] "
+fi
+
+# update terminal title and bash history whenever the prompt is displayed
+#export PROMPT_COMMAND='echo -ne "\033]2;${USER}@${HOSTNAME}: ${PWD}\007" && history -a'

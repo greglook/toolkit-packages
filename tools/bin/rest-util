@@ -1,0 +1,124 @@
+#!/usr/bin/ruby
+
+# This is a utility script for making JSON/HTTP requests to a REST-style
+# service endpoint.
+#
+# Author:: Greg Look
+
+require 'optparse'
+
+
+
+##### OPTIONS #####
+
+CURL_BIN = "/usr/bin/curl"
+SCRIPT_NAME = File.basename($0)
+PROTOCOLS = [:http, :https]
+HTTP_METHODS = [:HEAD, :GET, :PUT, :POST, :DELETE]
+MIME_TYPE_JSON = "application/json"
+
+# default options
+$options = {
+    :method => :GET,
+    :proto => :http,
+    :host => 'localhost',
+    :port => 80
+}
+
+# parse command-line options
+opts = OptionParser.new do |opts|
+  opts.banner = "Usage: #{SCRIPT_NAME} [options] [method] <path> [data]"
+  opts.separator ""
+  opts.separator "Connection Options:"
+  opts.on("--host HOST", "Server to contact (default: #{$options[:host]})") {|host| $options[:host] = host }
+  opts.on("--port PORT", "HTTP port (default: #{$options[:port]})") {|port| $options[:port] = port.to_i }
+  opts.on("--[no-]tls", "Use transport layer security (https)") {|v| $options[:proto] = v && :https || :http }
+  opts.separator ""
+  opts.separator "Data Options:"
+  opts.on('-i', "--input PATH", "Uploads the file contents as the request body") {|path| $options[:in_file] = path }
+  opts.on('-o', "--output PATH", "Writes the response data to a file") {|path| $options[:out_file] = path }
+  opts.separator ""
+  opts.separator "General Options:"
+  opts.on('-s', "--[no-]show-headers", "Show response header data") {|v| $options[:show_headers] = v }
+  opts.on('-v', "--[no-]verbose", "Show detailed request information") {|v| $options[:verbose] = v }
+  opts.on('-p', "--[no-]pretend", "Print curl command instead of executing it") {|v| $options[:pretend] = v }
+  opts.on('-h', "--help", "Display usage information") { puts opts; exit }
+  opts.separator ""
+  opts.separator "Arguments:"
+  opts.separator "The URI path must be given and must begin with a forward slash."
+  opts.separator "The HTTP method defaults to GET. If specified, it must be one of: #{HTTP_METHODS.join(', ')}"
+  opts.separator "PUT and POST requests accept an additional argument, which is sent as the request body."
+  opts.separator ""
+  opts.separator "Examples:"
+  opts.separator "  $ #{SCRIPT_NAME} /resource/"
+  opts.separator "  $ #{SCRIPT_NAME} put /resource/item '{\"description\":\"Test item\"}'"
+  opts.separator "  $ #{SCRIPT_NAME} post /resource/subresource/ -f path/to/data.txt"
+  opts.separator "  $ #{SCRIPT_NAME} delete /resource/item"
+end
+opts.parse!
+
+# helper method to report failures
+def fail(msg)
+  STDERR.puts msg
+  exit 1
+end
+
+# determine method and path
+if ARGV.empty?
+  puts opts
+  exit 1
+else
+  # if first arg does not start with a slash, interpret it as the method
+  $options[:method] = ARGV.shift.upcase.intern if ARGV.first =~ /^[^\/]/
+  fail "Invalid HTTP method: #{$options[:method]}" unless HTTP_METHODS.include? $options[:method]
+
+  # next arg is path and must begin with a slash
+  fail "You must specify a URI path" if ARGV.empty?
+  fail "URI path must begin with a slash: #{ARGV.first}" unless ARGV.first =~ /^\//
+  $options[:path] = ARGV.shift
+end
+
+# build curl command
+command = []
+
+# common options
+command << CURL_BIN
+command << "--silent"
+command << "--header 'Accept: #{MIME_TYPE_JSON}'"
+command << "--include" if $options[:show_headers]
+command << "--verbose" if $options[:verbose]
+
+# set method
+command << case $options[:method]
+  when :HEAD then "--head"
+  else "-X #{$options[:method].to_s.upcase}"
+end
+
+# input data
+data_arg = ARGV.shift if ARGV.first && [:PUT, :POST].include?($options[:method])
+if $options[:in_file] || data_arg
+  #command << "--header 'Content-Type: #{MIME_TYPE_JSON}'" # this makes Coral respond with <UnknownOperation/>
+  if $options[:in_file]
+    fail "Cannot use both input file and argument data" if data_arg
+    command << "-T #{$options[:in_file]}"
+  else
+    command << "-d '#{data_arg}'"
+  end
+end
+
+# output data
+command << "-o #{$options[:out_file]}" if $options[:out_file]
+
+# format url
+command << "%s://%s:%d%s" % [$options[:proto], $options[:host], $options[:port], $options[:path]]
+
+# command execution
+command = command.join(' ')
+if $options[:pretend]
+  puts command
+else
+  start = Time.now
+  puts %x{#{command}}
+  puts "%.1f ms" % [1000*(Time.now - start)] if $options[:verbose]
+  exit $?.exitstatus
+end

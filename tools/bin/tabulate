@@ -1,0 +1,91 @@
+#!/usr/bin/ruby
+
+# This script captures patterns from text a stream and groups unique results
+# into a table format. This is mainly useful for analyzing the frequency of a
+# certain type of value in the stream - e.g., event properties in a log file.
+#
+# Multiple patterns can be specified as arguments, or if no patterns are
+# provided each line of input will be captured. The captured values can also
+# be joined together or formatted in customizable ways.
+#
+# tabulate '^[^\[]*\[(\w+)\]'
+#   capture log4j levels from each line in a file
+#
+# tabulate -f '%s @ %s' 'AppName=([^,}\]]+)' 'EnvName=([^,}\]]+)'
+#   capture application and environment names from a BSF message dump and
+#   print with a custom format
+#
+# Author:: Greg Look (greglook@amazon.com)
+
+require 'optparse'
+
+
+# option defaults
+$delim = ' '
+$limit = 0
+
+# parse command-line options
+options = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] [pattern ...]"
+  opts.on('-j', '--join STRING', "String to join pattern captures") {|delim| $delim = delim }
+  opts.on('-f', '--format STRING', "Format string for pattern captures") {|format| $format = format }
+  opts.on('-l', '--limit PERCENT', Float, "Only display captures with a minimum percent of the total") {|p| $limit = p }
+  opts.on('-v', '--verbose', "Show extra information after tabulation") { $verbose = true }
+  opts.on('-h', '--help', "Display usage information") { print opts; exit }
+end
+options.parse!
+
+# initialize state
+$patterns = ARGV.map {|pattern| Regexp.new(pattern) }
+$entries = Hash.new(0)
+$matched = 0
+$total = 0
+$start = Time.now
+
+# process input
+while line = STDIN.gets
+  next if line.strip!.empty?
+  $total += 1
+
+  if $patterns.empty?
+    $entries[line] += 1
+    $matched += 1
+  else
+    matches = 0
+    captures = []
+    $patterns.each do |pattern|
+      if match = pattern.match(line)
+        matches += 1
+        captures += match.captures
+      end
+    end
+    if matches == $patterns.size
+      key = $format.nil? ? captures.join($delim) : ($format % captures)
+      $entries[key] += 1
+      $matched += 1
+    end
+  end
+end
+
+# helper to calculate the proportion of the total.
+def pct(count)
+  100*count.to_f/$matched
+end
+
+# print results
+unless $matched == 0
+  width = 1 + (Math.log($matched)/Math.log(10)).floor
+  puts "%#{width}d --------- Total" % $matched
+  counts = $entries.keys.reject{|k| pct($entries[k]) < $limit }.map{|k| [$entries[k], k] }.sort.reverse
+  remainder = $entries.keys.select{|k| pct($entries[k]) < $limit }
+  counts << [remainder.inject(0) {|sum,k| sum + $entries[k] }, "(%d more...)" % remainder.size] unless remainder.empty?
+
+  counts.each do |entry|
+    puts "%#{width}d (%6.2f%%) %s" % [entry[0], pct(entry[0]), entry[1]]
+  end
+end
+
+# print extra statistics
+if $verbose
+  puts "%d/%d lines matched in %.3f seconds" % [$matched, $total, Time.now - $start]
+end

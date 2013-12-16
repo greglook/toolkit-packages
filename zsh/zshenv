@@ -1,0 +1,41 @@
+# Z-Shell environment configuration. This file is sourced for all Z-shells and
+# sets up a common environment for command execution. In particular, all
+# manipulation of $PATH and $FPATH should be done by environment files.
+#
+# Modular configuration should be placed in the ~/.zsh/env.d/ directory.
+# vim: ft=zsh
+
+##### SHELL BEHAVIOR #####
+
+# general options
+setopt dvorak extended_glob notify
+unsetopt all_export beep
+
+# directory settings
+setopt auto_cd auto_pushd pushd_ignore_dups #pushd_silent
+export DIRSTACKSIZE=10
+
+# history settings
+setopt hist_ignore_dups hist_ignore_space
+export HISTFILE=~/.histfile
+export HISTSIZE=1000
+export SAVEHIST=1000
+
+
+
+##### UTILITY FUNCTIONS #####
+
+# sources all regular files in the given directory, if it exists.
+load_configs() {
+    if [[ -d "$1" ]]; then
+        local find=$(PATH="/bin:/usr/bin:$PATH" which find)
+        for config in $($find -L $1 -type f); source $config
+    fi
+}
+
+
+
+##### ENVIRONMENT MODULES #####
+
+# load additional configuration
+load_configs "$HOME/.zsh/env.d"

@@ -1,0 +1,6 @@
+! X input modification map
+
+! rebind caps-lock as left-control
+keycode 66 = Control_L
+clear Lock
+add Control = Control_L

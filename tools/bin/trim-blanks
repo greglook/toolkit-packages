@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [[ -n $1 ]]; then
+    find . -not \( -name '.svn' -prune -or -name '.git' -prune \) -type f -print0 | xargs -0 sed -i '' -e "s/[[:space:]]*$//"
+else
+    echo "The following files would be trimmed:"
+    find . -not \( -name '.svn' -prune -or -name '.git' -prune \) -type f -print
+    echo "Pass a value for the first argument to trim files."
+fi

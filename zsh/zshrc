@@ -1,0 +1,150 @@
+# Z-shell interactive configuration. This file is sourced for interactive
+# shells and configures how the user interacts with zsh.
+#
+# Modular configuration should be placed in the ~/.zsh/rc.d/ directory.
+# vim: ft=zsh
+
+##### APPEARANCE #####
+
+# load zsh color helpers
+autoload -U colors && colors
+
+# command-line prompt
+export PROMPT="%B%(!,,%{$fg[green]%}%n%{$fg[blue]%}@)%{$fg[red]%}%m %{$fg[blue]%}%c %(0?,,%{$fg[red]%}%(1?,,[%?] ))%#%{$reset_color%}%b "
+
+# right-side prompt with version control info
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git svn
+zstyle ':vcs_info:*' unstagedstr "%{$fg[red]%}"
+zstyle ':vcs_info:*' stagedstr "%{$fg[yellow]%}"
+
+zstyle ':vcs_info:*' formats '%c%u%r/%b'
+zstyle ':vcs_info:*' actionformats '(%a) %c%u%r/%b'
+zstyle ':vcs_info:*' branchformat '%b@%r'
+
+zstyle ':vcs_info:git*' get-revision true
+zstyle ':vcs_info:git*' check-for-changes true
+zstyle ':vcs_info:git*' formats '%c%u%m %r/%b@%.7i'
+zstyle ':vcs_info:git*' actionformats '(%a) %c%u%m %r/%b@%.7i'
+
+setopt prompt_subst
+export RPROMPT='%{$fg[green]%}${vcs_info_msg_0_}%{$reset_color%}'
+
+# sets the terminal title
+settitle() {
+    case $TERM in
+        xterm*) print -Pn "\e]0;$1\a";;
+        #screen*) print -Pn "\033k$1\033\\";; # sets the window *name* in tmux
+        screen*) print -Pn "\e]0;$1\a";;      # sets the window *title* in tmux
+    esac
+}
+
+# update the terminal title and VCS info when the prompt is displayed
+precmd() {
+    vcs_info
+    case $TERM in
+        xterm*)  settitle "%n@%m:%~";;
+        screen*) settitle "%~";;
+    esac
+}
+
+# update the title with the current command when executing a program
+preexec() {
+    case $TERM in
+        xterm*)  settitle "%n@%m:%~ %# $2";;
+        screen*) settitle $2;;
+    esac
+}
+
+
+
+##### TIMING #####
+
+# If a command takes more than 10 CPU seconds, automatically print the time it took.
+REPORTTIME=10
+
+# Format the output of the time command to be a little more human friendly.
+TIMEFMT=" Elapsed: %*E User: %U Kernel: %*S"
+
+
+
+##### KEY BINDINGS #####
+
+# use vim-style key bindings
+bindkey -v
+
+# home/end (PuTTY/OS X)
+bindkey '^[[1~'   beginning-of-line
+bindkey '^[[4~'   end-of-line
+
+# home/end (MinTTY)
+bindkey '^[[H'    beginning-of-line
+bindkey '^[[F'    end-of-line
+
+# delete
+bindkey '^[[3~'   delete-char
+
+# incremental history search
+bindkey '^r'      history-incremental-search-backward
+
+# ctrl+up/down to search command history
+bindkey '^[[1;5A' history-search-backward
+bindkey '^[[1;5B' history-search-forward
+
+# ctrl+left/right to move whole words
+bindkey '^[[1;5C' forward-word
+bindkey '^[[1;5D' backward-word
+
+# ctrl+backspace/delete to remove whole words
+bindkey '^[[3;5~' kill-word
+bindkey '^_' backward-kill-word
+
+# set additional word boundary characters
+export WORDCHARS=$(echo $WORDCHARS | sed -e 's/[\/._-]//g')
+
+
+
+##### COMMANDS #####
+
+# load zmv
+autoload -U zmv
+
+# standard commands
+export PAGER='less'
+export EDITOR='vim'
+
+# common aliases
+alias d='dirs -v'
+alias ls='ls --color=auto'
+alias ll='ls -lh --color=auto'
+alias la='ls -lhA --color=auto'
+alias bc='bc -lq'
+alias tmux='tmux -2'
+
+
+
+##### FUNCTIONS & COMPLETIONS #####
+
+# autoload functions
+local function_dir="$HOME/.zsh/functions"
+if [[ -d $function_dir ]]; then
+    fpath+=$function_dir
+    for func in $(find -L $function_dir -type f); autoload $(basename $func)
+fi
+
+# register completion functions
+local completion_dir="$HOME/.zsh/completions"
+[[ -d $completion_dir ]] && fpath+=$completion_dir
+
+# enable autocompletion
+autoload -U compinit && compinit
+
+# ensure function path only contains unique entries
+typeset -U fpath
+
+
+
+##### CONFIGURATION MODULES #####
+
+# load additional configuration
+load_configs "$HOME/.zsh/rc.d"
