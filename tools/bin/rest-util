@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
 # This is a utility script for making JSON/HTTP requests to a REST-style
 # service endpoint.
@@ -14,12 +14,19 @@ require 'optparse'
 CURL_BIN = "/usr/bin/curl"
 SCRIPT_NAME = File.basename($0)
 PROTOCOLS = [:http, :https]
-HTTP_METHODS = [:HEAD, :GET, :PUT, :POST, :DELETE]
-MIME_TYPE_JSON = "application/json"
+HTTP_METHODS = [:HEAD, :GET, :PUT, :POST, :DELETE, :OPTIONS]
+MIME_TYPES = {
+  :json => "application/json",
+  :edn  => "application/edn",
+  :yaml => "application/yaml",
+  :html => "text/html"
+}
 
 # default options
 $options = {
     :method => :GET,
+    :accept => :json,
+    :format => :json,
     :proto => :http,
     :host => 'localhost',
     :port => 80
@@ -35,6 +42,8 @@ opts = OptionParser.new do |opts|
   opts.on("--[no-]tls", "Use transport layer security (https)") {|v| $options[:proto] = v && :https || :http }
   opts.separator ""
   opts.separator "Data Options:"
+  opts.on('-a', "--accept FORMAT", MIME_TYPES.keys, "Specifies the format of data to accept (default: #{$options[:accept]})") {|format| $options[:accept] = format }
+  opts.on('-f', "--format FORMAT", MIME_TYPES.keys, "Specifies the format of data being sent (default: #{$options[:accept]})") {|format| $options[:format] = format }
   opts.on('-i', "--input PATH", "Uploads the file contents as the request body") {|path| $options[:in_file] = path }
   opts.on('-o', "--output PATH", "Writes the response data to a file") {|path| $options[:out_file] = path }
   opts.separator ""
@@ -51,8 +60,8 @@ opts = OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Examples:"
   opts.separator "  $ #{SCRIPT_NAME} /resource/"
-  opts.separator "  $ #{SCRIPT_NAME} put /resource/item '{\"description\":\"Test item\"}'"
-  opts.separator "  $ #{SCRIPT_NAME} post /resource/subresource/ -f path/to/data.txt"
+  opts.separator "  $ #{SCRIPT_NAME} -f json put /resource/item '{\"description\":\"Test item\"}'"
+  opts.separator "  $ #{SCRIPT_NAME} post /resource/subresource/ -i path/to/data.txt"
   opts.separator "  $ #{SCRIPT_NAME} delete /resource/item"
 end
 opts.parse!
@@ -84,7 +93,8 @@ command = []
 # common options
 command << CURL_BIN
 command << "--silent"
-command << "--header 'Accept: #{MIME_TYPE_JSON}'"
+command << "--header 'Accept: #{MIME_TYPES[$options[:accept]]}'"
+command << "--header 'Content-Type: #{MIME_TYPES[$options[:format]]}'" if [:PUT, :POST].include?($options[:method])
 command << "--include" if $options[:show_headers]
 command << "--verbose" if $options[:verbose]
 
