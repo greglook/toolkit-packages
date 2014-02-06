@@ -67,9 +67,9 @@ end
 opts.parse!
 
 # helper method to report failures
-def fail(msg)
+def fail(msg, code=1)
   STDERR.puts msg
-  exit 1
+  exit code
 end
 
 # determine method and path
@@ -120,7 +120,8 @@ end
 command << "-o #{$options[:out_file]}" if $options[:out_file]
 
 # format url
-command << "%s://%s:%d%s" % [$options[:proto], $options[:host], $options[:port], $options[:path]]
+url = "%s://%s:%d%s" % [$options[:proto], $options[:host], $options[:port], $options[:path]]
+command << "\"#{url}\""
 
 # command execution
 command = command.join(' ')
@@ -128,7 +129,25 @@ if $options[:pretend]
   puts command
 else
   start = Time.now
-  puts %x{#{command}}
-  puts "%.1f ms" % [1000*(Time.now - start)] if $options[:verbose]
-  exit $?.exitstatus
+  output = %x{#{command}}
+  elapsed = 1000*(Time.now - start)
+  puts "%.1f ms" % elapsed if $options[:verbose]
+
+  if $?.success?
+    puts output
+  else
+    message = case $?.exitstatus
+              when  3 then "URL malformed: #{url}"
+              when  6 then "Couldn't resolve host: #{$options[:host]}"
+              when  7 then "Couldn't connect to host: #{$options[:host]}"
+              when 28 then "Operation timed out after #{elapsed} ms"
+              when 35 then "SSL connection handshake failed"
+              when 47 then "Too many redirects"
+              when 51 then "Peer SSL certificate or MD5 fingerprint is invalid"
+              when 52 then "No response from server"
+              when 60 then "Peer certificate cannot be authenticated by known authorities"
+              else "Unknown curl error #{$?.exitstatus}"
+              end
+    fail message, $?.exitstatus
+  end
 end
