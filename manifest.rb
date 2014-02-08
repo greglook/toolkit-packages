@@ -1,6 +1,4 @@
-# Manifest registration of available toolkit modules.
-#
-# Author:: Greg Look
+# Manifest of available toolkit packages.
 
 # scripts and utilities
 package 'tools',    :default => true
@@ -15,6 +13,7 @@ package 'solarized', :dotfiles => ['vim', 'zsh']
 
 # application settings
 package 'git',     :dotfiles => true, :when => installed?('git')
+package 'lein',    :dotfiles => true, :when => installed?('lein')
 package 'tmux',    :dotfiles => true, :when => installed?('tmux')
 package 'vim',     :dotfiles => true, :when => installed?('vim')
 package 'vundle',  :into => '.vim'
