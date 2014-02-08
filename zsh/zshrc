@@ -114,6 +114,11 @@ export PAGER='less'
 export EDITOR='vim'
 
 # common aliases
+alias u='cd ..'
+alias uu='cd ../..'
+alias uuu='cd ../../..'
+alias uuuu='cd ../../../..'
+alias uuuuu='cd ../../../../..'
 alias d='dirs -v'
 alias ls='ls --color=auto'
 alias ll='ls -lh --color=auto'
