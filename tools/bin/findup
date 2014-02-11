@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ -z "$1" ]]; then
+    echo "Usage: $(basename $0) <pattern>"
+    exit 1
+fi
+
+DIR=$PWD
+
+while [[ $(readlink -f $DIR) != "/" ]]; do
+    if [[ -n "$(find "$DIR" -maxdepth 1 -mindepth 1 -name "$1")" ]]; then
+        echo $DIR
+        exit
+    else
+        DIR=$(dirname $DIR)
+    fi
+done
+
+echo "$1 not found in any parent directory of $PWD" >&2
+exit 1
