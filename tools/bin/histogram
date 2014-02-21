@@ -30,6 +30,7 @@ $boundaries = nil
 
 # display options
 $precision = 0
+$cumulative = false
 $bar_length = 60
 
 # helper method to abort the script
@@ -44,6 +45,7 @@ options = OptionParser.new do |opts|
   opts.on('-w', '--width VALUE', "Width of each histogram bucket") {|v| $width = v.to_f; fail "Bucket width must be positive" unless $width > 0.0 }
   opts.on('-n', '--count N', "Number of histogram buckets") {|v| $count = v.to_i; fail "Bucket count must be positive" unless $count > 0 }
   opts.on('-p', '--precision N', "Boundary display precision (default: #{$precision})") {|v| $precision = v.to_i }
+  opts.on('-c', '--cumulative', "Show cumulative frequency instead of per-bucket") { $cumulative = true }
   opts.on('-b', '--bar-length N', "Length of longest histogram bar (default: #{$bar_length})") {|v| $bar_length = v.to_i }
   opts.on('-h', '--help', "Print these options") { puts opts; exit }
 end
@@ -120,8 +122,16 @@ unless $total == 0
 
   max_pct = entries.map{|e| e[2] }.max
 
+  cum_freq = 0.0
   entries.each do |entry|
-    bar = ($bar_length*entry[2]/max_pct).ceil
-    puts format % [entry[0], entry[1], 100*entry[2], '#'*bar]
+    value, count, freq = *entry
+    bar = ($bar_length*freq/max_pct).ceil
+    cum_freq = cum_freq + freq
+    puts format % [
+      value,
+      count,
+      100*($cumulative ? cum_freq : freq),
+      '#'*bar
+    ]
   end
 end
