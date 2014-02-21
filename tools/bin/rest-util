@@ -25,32 +25,29 @@ MIME_TYPES = {
 # default options
 $options = {
     :method => :GET,
+    :url => nil,
     :accept => :json,
-    :format => :json,
-    :proto => :http,
-    :host => 'localhost',
-    :port => 80
+    :content => :json,
+    :insecure => false
 }
 
 # parse command-line options
 opts = OptionParser.new do |opts|
-  opts.banner = "Usage: #{SCRIPT_NAME} [options] [method] <path> [data]"
+  opts.banner = "Usage: #{SCRIPT_NAME} [options] [method] <url> [data]"
   opts.separator ""
   opts.separator "Connection Options:"
-  opts.on("--host HOST", "Server to contact (default: #{$options[:host]})") {|host| $options[:host] = host }
-  opts.on("--port PORT", "HTTP port (default: #{$options[:port]})") {|port| $options[:port] = port.to_i }
-  opts.on("--[no-]tls", "Use transport layer security (https)") {|v| $options[:proto] = v && :https || :http }
+  opts.on('-s', "--show-headers", "Show response header data") { $options[:show_headers] = true }
+  opts.on('-k', "--insecure", "Allow TLS connections which are not trusted by installed CAs") { $options[:insecure] = true }
   opts.separator ""
   opts.separator "Data Options:"
   opts.on('-a', "--accept FORMAT", MIME_TYPES.keys, "Specifies the format of data to accept (default: #{$options[:accept]})") {|format| $options[:accept] = format }
-  opts.on('-f', "--format FORMAT", MIME_TYPES.keys, "Specifies the format of data being sent (default: #{$options[:accept]})") {|format| $options[:format] = format }
+  opts.on('-c', "--content FORMAT", MIME_TYPES.keys, "Specifies the format of data being sent (default: #{$options[:content]})") {|format| $options[:content] = format }
   opts.on('-i', "--input PATH", "Uploads the file contents as the request body") {|path| $options[:in_file] = path }
   opts.on('-o', "--output PATH", "Writes the response data to a file") {|path| $options[:out_file] = path }
   opts.separator ""
   opts.separator "General Options:"
-  opts.on('-s', "--[no-]show-headers", "Show response header data") {|v| $options[:show_headers] = v }
-  opts.on('-v', "--[no-]verbose", "Show detailed request information") {|v| $options[:verbose] = v }
-  opts.on('-p', "--[no-]pretend", "Print curl command instead of executing it") {|v| $options[:pretend] = v }
+  opts.on('-v', "--verbose", "Show detailed request information") { $options[:verbose] = true }
+  opts.on('-p', "--pretend", "Print curl command instead of executing it") { $options[:pretend] = true }
   opts.on('-h', "--help", "Display usage information") { puts opts; exit }
   opts.separator ""
   opts.separator "Arguments:"
@@ -59,10 +56,10 @@ opts = OptionParser.new do |opts|
   opts.separator "PUT and POST requests accept an additional argument, which is sent as the request body."
   opts.separator ""
   opts.separator "Examples:"
-  opts.separator "  $ #{SCRIPT_NAME} /resource/"
-  opts.separator "  $ #{SCRIPT_NAME} -f json put /resource/item '{\"description\":\"Test item\"}'"
-  opts.separator "  $ #{SCRIPT_NAME} post /resource/subresource/ -i path/to/data.txt"
-  opts.separator "  $ #{SCRIPT_NAME} delete /resource/item"
+  opts.separator "  $ #{SCRIPT_NAME} http://host/resource/"
+  opts.separator "  $ #{SCRIPT_NAME} -f json put http://host/resource/item '{\"description\":\"Test item\"}'"
+  opts.separator "  $ #{SCRIPT_NAME} post http://host/resource/subresource/ -i path/to/data.txt"
+  opts.separator "  $ #{SCRIPT_NAME} delete http://host/resource/item"
 end
 opts.parse!
 
@@ -72,19 +69,18 @@ def fail(msg, code=1)
   exit code
 end
 
-# determine method and path
+# determine method and URL
 if ARGV.empty?
   puts opts
   exit 1
 else
-  # if first arg does not start with a slash, interpret it as the method
-  $options[:method] = ARGV.shift.upcase.intern if ARGV.first =~ /^[^\/]/
+  # if there are multiple arguments, interpret the first as the method
+  $options[:method] = ARGV.shift.upcase.intern if ARGV.count > 1
   fail "Invalid HTTP method: #{$options[:method]}" unless HTTP_METHODS.include? $options[:method]
 
-  # next arg is path and must begin with a slash
-  fail "You must specify a URI path" if ARGV.empty?
-  fail "URI path must begin with a slash: #{ARGV.first}" unless ARGV.first =~ /^\//
-  $options[:path] = ARGV.shift
+  # next arg is the resource location
+  fail "You must specify a URI or path" if ARGV.empty?
+  $options[:url] = ARGV.shift
 end
 
 # build curl command
@@ -94,7 +90,8 @@ command = []
 command << CURL_BIN
 command << "--silent"
 command << "--header 'Accept: #{MIME_TYPES[$options[:accept]]}'"
-command << "--header 'Content-Type: #{MIME_TYPES[$options[:format]]}'" if [:PUT, :POST].include?($options[:method])
+command << "--header 'Content-Type: #{MIME_TYPES[$options[:content]]}'" if [:PUT, :POST].include?($options[:method])
+command << "--insecure" if $options[:insecure]
 command << "--include" if $options[:show_headers]
 command << "--verbose" if $options[:verbose]
 
@@ -120,8 +117,7 @@ end
 command << "-o #{$options[:out_file]}" if $options[:out_file]
 
 # format url
-url = "%s://%s:%d%s" % [$options[:proto], $options[:host], $options[:port], $options[:path]]
-command << "\"#{url}\""
+command << "\"#{$options[:url]}\""
 
 # command execution
 command = command.join(' ')
