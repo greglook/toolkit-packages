@@ -1,52 +1,46 @@
 #!/bin/sh
 
-# test for root
+# Ensure that the user is root.
 if [[ $USER -ne "root" ]]; then
     echo "Must be root to install a new kernel!"
     exit 1
 fi
 
-# parse kernel version from .config file
+# Kernel artifacts.
 SRC_DIR="/usr/src/linux"
 KERNEL_CONFIG=$SRC_DIR/.config
+KERNEL_IMAGE=$SRC_DIR/arch/i386/boot/bzImage
 
 if [[ ! -f "$KERNEL_CONFIG" ]]; then
     echo "Kernel has not been configured!"
     exit 1
 fi
 
+# Parse kernel version from config file.
 KERNEL_VERSION=$(head $KERNEL_CONFIG | grep -m 1 -i 'kernel' | grep -o -P '\d+\.\d+\.\d+\-\w+(\-r\d+)?')
-
 if [[ -z $KERNEL_VERSION ]]; then
     echo "Could not determine kernel version!"
     exit 1
 fi
 
-# build kernel
+# Build kernel.
 echo "Building kernel $KERNEL_VERSION..."
 cd $SRC_DIR && make
 
-if [[ $? != 0 ]]; then
+if [[ $? != 0 || ! -f "$KERNEL_IMAGE" ]]; then
     echo "Error building kernel!"
     exit 1
 fi
 
-# kernel artifacts
-KERNEL_IMAGE=$SRC_DIR/arch/i386/boot/bzImage
-SYSTEM_MAP=$SRC_DIR/System.map
+# Determine size of artifacts.
+ARTIFACT_SIZE=$(ls -sL1 $KERNEL_CONFIG $KERNEL_IMAGE | awk '{ SIZE += $1 } END { print SIZE }')
+echo "Built kernel image and config occupying $ARTIFACT_SIZE blocks"
 
-# determine size of artifacts
-ARTIFACT_SIZE=$(ls -sL1 $KERNEL_CONFIG $KERNEL_IMAGE $SYSTEM_MAP | awk '{ SIZE += $1 } END { print SIZE }')
-echo "Built kernel image and configs occupying $ARTIFACT_SIZE blocks"
-
-# boot directory configuration
+# Boot directory configuration.
 BOOT_DIR="/boot"
 BOOT_PARTITION=$(grep $BOOT_DIR /etc/fstab | awk '{ print $1 }')
-BOOT_CONFIG="$BOOT_DIR/grub/grub.conf"
-KERNEL_DIR="$BOOT_DIR/linux/$KERNEL_VERSION"
-KERNEL_LINK="$BOOT_DIR/main"
 
-# mount boot if needed
+# Mount boot if needed.
 if [[ -n $BOOT_PARTITION ]]; then
     if [[ -z $(mount | grep $BOOT_PARTITION) ]]; then
         echo "Mounting boot partition $BOOT_PARTITION..."
@@ -55,7 +49,7 @@ if [[ -n $BOOT_PARTITION ]]; then
         echo "$BOOT_PARTITION is already mounted"
     fi
 
-    # check boot filesystem usage
+    # Check boot filesystem usage.
     BOOT_FREE=$(df $BOOT_PARTITION | tail -n 1 | awk '{ print $4 }')
     echo "Boot partition $BOOT_PARTITION has $BOOT_FREE blocks available"
     if [[ $BOOT_FREE -le $ARTIFACT_SIZE ]]; then
@@ -64,34 +58,30 @@ if [[ -n $BOOT_PARTITION ]]; then
     fi
 fi
 
-# set up boot structure
-echo "Configuring $BOOT_DIR..."
-mkdir -p $KERNEL_DIR
-rm $KERNEL_LINK
-ln -s $KERNEL_DIR $KERNEL_LINK
-
-# copy kernel image, system map, and config file
+# Copy kernel image and config file.
 echo "Copying kernel artifacts..."
-cp $KERNEL_CONFIG $KERNEL_DIR/config
-cp $KERNEL_IMAGE  $KERNEL_DIR/kernel
-cp $SYSTEM_MAP    $KERNEL_DIR/System.map
+cp $KERNEL_CONFIG $BOOT_DIR/config-$KERNEL_VERSION
+cp $KERNEL_IMAGE  $BOOT_DIR/kernel-$KERNEL_VERSION
 
-# unmount boot if needed
+# Regenerate grub2 configuration.
+grub2-mkconfig -o /boot/grub/grub.cfg
+
+# Unmount boot if needed.
 if [[ -n $BOOT_PARTITION ]]; then
     echo "Unmounting $BOOT_PARTITION..."
     umount $BOOT_PARTITION
 fi
 
-# install modules
+# Install built kernel modules.
 echo "Installing modules..."
 cd $SRC_DIR && make modules_install
-
 if [[ $? != 0 ]]; then
     echo "Error installing kernel modules!"
     exit 1
 fi
 
-# re-emerge packages with modules
-module-rebuild rebuild
+# Re-emerge packages with modules.
+echo "Recompiling module-dependent packages..."
+emerge @module-rebuild
 
 echo "Done installing new kernel!"
