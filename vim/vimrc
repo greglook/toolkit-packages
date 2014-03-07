@@ -115,11 +115,15 @@ nnoremap <leader>t :%s/\t/  /<cr>
 nnoremap <leader>T :%s/\t/    /<cr>
 
 " strip trailing whitespace from the file
-nnoremap <leader>w :%s/\s\+$//<cr>
+nnoremap <leader>s :%s/\s\+$//<cr>
 " add this to unhighlight things: :let @/=''<cr>
 
 " select text which was just pasted
 nnoremap <leader>v V`]
+
+" reverse the highlighted lines
+command! -bar -range=% Reverse <line1>,<line2>g/^/m<line1>-1|nohl
+vnoremap <leader>r :Reverse<cr>
 
 " use tab to jump to matching enclosure pairs
 nnoremap <tab> %
