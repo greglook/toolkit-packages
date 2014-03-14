@@ -5,22 +5,22 @@ package 'tools',    :default => true
 package 'keychain', :dotfiles => ['zsh']
 
 # shell configuration
-package 'input',     :dotfiles => true, :default => true
-package 'bash',      :dotfiles => true, :when => ( File.basename(ENV['SHELL']) == 'bash' )
-package 'zsh',       :dotfiles => true, :when => ( File.basename(ENV['SHELL']) == 'zsh'  )
-package 'cygwin',    :dotfiles => true, :when => ( File.exist? '/Cygwin.bat' )
+package 'input',     :default => true,              :dotfiles => true
+package 'bash',      :when => shell?('bash'),       :dotfiles => true
+package 'zsh',       :when => shell?('zsh'),        :dotfiles => true
+package 'cygwin',    :when => file?('/Cygwin.bat'), :dotfiles => true
 package 'solarized', :dotfiles => ['vim', 'zsh']
 
 # application settings
-package 'git',     :dotfiles => true, :when => installed?('git')
-package 'lein',    :dotfiles => true, :when => installed?('lein')
-package 'tmux',    :dotfiles => true, :when => installed?('tmux')
-package 'vim',     :dotfiles => true, :when => installed?('vim')
+package 'git',     :when => installed?('git'),  :dotfiles => true
+package 'tmux',    :when => installed?('tmux'), :dotfiles => ['tmux.conf', 'zsh']
+package 'vim',     :when => installed?('vim'),  :dotfiles => true
 package 'vundle',  :into => '.vim'
 package 'synergy', :into => 'util/synergy'
 
 # programming languages
-package 'rbenv', :dotfiles => true, :when => File.directory?(File.join(ENV['HOME'], '.rbenv'))
+package 'lein',  :when => installed?('lein'),           :dotfiles => true
+package 'rbenv', :when => file?(ENV['HOME'], '.rbenv'), :dotfiles => true
 
 # misc packages
 package 'gentoo', :into => 'util/gentoo'
