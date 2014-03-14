@@ -18,8 +18,9 @@ Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
 
 " Clojure
-Bundle 'tpope/vim-fireplace'
+"Bundle 'tpope/vim-fireplace'
 Bundle 'guns/vim-clojure-static'
+Bundle 'jpalardy/vim-slime'
 Bundle 'amdt/vim-niji'
 Bundle 'paredit.vim'
 
@@ -32,13 +33,15 @@ Bundle 'ledger/vim-ledger'
 filetype plugin indent on
 
 
+" Config
+
+let g:slime_target = "tmux"
+"let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
+
+
 " Shortcuts
 
 " fugitive shortcuts
 nnoremap <leader>gs :Gstatus<cr>
 nnoremap <leader>gd :Gdiff<cr>
 nnoremap <leader>gl :Glog<cr>
-
-
-" doesn't work?
-let g:niji_colours = ['white', 'red', 'blue']
