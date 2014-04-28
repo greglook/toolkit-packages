@@ -1,11 +1,34 @@
-{:aliases {"all" ["do" ["clean"] ["check"] ["test"] ["cloverage"]]}
+{:aliases
+ {"all" ["do" ["clean"] ["check"] ["test"] ["cloverage"]]}
+
+ :deploy-repositories
+ [["clojars"
+   ^:replace
+   {:url "https://clojars.org/repo/"
+    :username "greg@greg-look.net"
+    :password ""}]]
+
  :dependencies
- [[org.clojure/tools.trace "0.7.6"]]
+ [[clj-stacktrace "0.2.7"]
+  [org.clojure/tools.trace "0.7.6"]]
+
  :plugins
- [[jonase/eastwood "0.1.0"]
-  [lein-cloverage "1.0.2"]
+ [[lein-cloverage "1.0.2"]
+  [lein-cprint "1.0.0"]
   [lein-exec "0.3.1"]
+  [lein-hiera "0.8.0"]
   [lein-kibit "0.0.8"]
-  [lein-ns-dep-graph "0.1.0-SNAPSHOT"]
   [lein-pprint "1.1.1"]
-  [com.jakemccrary/lein-test-refresh "0.3.9"]]}
+  [lein-vanity "0.2.0"]
+  [com.jakemccrary/lein-test-refresh "0.3.9"]
+  [jonase/eastwood "0.1.0"]]
+
+ :injections
+ [(let [orig (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
+        new  (ns-resolve (doto 'clj-stacktrace.repl require) 'pst+)]
+    (alter-var-root orig (constantly (deref new))))]
+
+ :hiera
+ {:show-external? true
+  :vertical? false
+  :ignore-ns #{clojure user}}}
