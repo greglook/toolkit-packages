@@ -12,7 +12,7 @@ fi
 
 PROJECT_ROOT=$1
 SESSION=${2:-$(basename $PROJECT_ROOT)}
-NAMESPACE=$3
+NAMESPACE=$(echo $3 | tr '.-' '/_')
 
 # Don't run inside tmux!
 if [[ -n "$TMUX" ]]; then
