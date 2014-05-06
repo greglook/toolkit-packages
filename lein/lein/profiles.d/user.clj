@@ -18,7 +18,6 @@
   [lein-exec "0.3.1"]
   [lein-hiera "0.8.0"]
   [lein-kibit "0.0.8"]
-  [lein-pprint "1.1.1"]
   [lein-vanity "0.2.0"]
   [com.jakemccrary/lein-test-refresh "0.3.9"]
   [jonase/eastwood "0.1.0"]]
