@@ -1,19 +1,13 @@
 {:aliases
- {"all" ["do" ["clean"] ["check"] ["test"] ["cloverage"]]}
-
- :deploy-repositories
- [["clojars"
-   ^:replace
-   {:url "https://clojars.org/repo/"
-    :username "greg@greg-look.net"
-    :password ""}]]
+ {"all" ["do" ["clean"] ["check"] ["test"] ["cloverage"] ["hiera"]]}
 
  :dependencies
  [[clj-stacktrace "0.2.7"]
   [org.clojure/tools.trace "0.7.6"]]
 
  :plugins
- [[lein-cloverage "1.0.2"]
+ [[lein-ancient "0.5.5"]
+  [lein-cloverage "1.0.2"]
   [lein-cprint "1.0.0"]
   [lein-exec "0.3.1"]
   [lein-hiera "0.8.0"]
