@@ -1,0 +1,16 @@
+# Utility function to run a command using an environment provided by a local
+# '.env' file.
+#
+# vim: ft=zsh
+
+with_env() {
+    ENV_FILE="$PWD/.env"
+    if [[ -f "$ENV_FILE" ]]; then
+        VARS=$(cat $ENV_FILE | grep -v "^#" | tr "\\n" " ")
+        env $VARS "$@"
+    else
+        "$@"
+    fi
+}
+
+with_env "$@"
