@@ -43,14 +43,14 @@ end
 
 # Returns a map with network traffic metrics based on the given name.
 def record_traffic(name, packets, bytes)
-  {"#{name}.packets" => packets.to_i,
-   "#{name}.bytes" => bytes.to_i}
+  {"#{name} packets" => packets.to_i,
+   "#{name} bytes" => bytes.to_i}
 end
 
 # Matches an iptables chain header.
 def match_chain(name, chain)
   match /^Chain #{chain.upcase} \(policy \w+ (\d+) packets, (\d+) bytes\)/ do |m|
-    record_traffic name, m[2], m[3]
+    record_traffic name, m[1], m[2]
   end
 end
 
@@ -71,28 +71,27 @@ def get_metrics
   filter_input =
   run "iptables --list INPUT --verbose --exact" do |line|
     find_match line,
-      match_chain("filter input default", "INPUT"),
-      match_rule("filter input lan0", in: 'lan0'),
-      match_rule("filter input lo", in: 'lo'),
-      match_rule("filter input established", in: 'wan0',
-                 match: 'state RELATED,ESTABLISHED')
+      match_chain("filter input DROP", "INPUT"),       # Dropped traffic
+      match_rule("filter input lan0", in: 'lan0'),        # Traffic to XVI from the LAN
+      match_rule("filter input established", in: 'wan0',  # Established traffic to XVI from Internet.
+                 match: 'ctstate RELATED,ESTABLISHED')
   end
 
   # FILTER:OUTPUT chain
   filter_output =
   run "iptables --list OUTPUT --verbose --exact" do |line|
     find_match line,
-      match_chain("filter output default", "OUTPUT")
+      match_chain("filter output", "OUTPUT")      # Traffic sent by XVI
   end
 
   # FILTER:FORWARD chain
   filter_forward =
   run "iptables --list FORWARD --verbose --exact" do |line|
     find_match line,
-      match_chain("filter forward default", "FORWARD"),
-      match_rule("filter forward lan0", in: 'lan0'),
-      match_rule("filter forward established",
-                 match: 'state RELATED,ESTABLISHED')
+      match_chain("filter forward DROP", "FORWARD"),
+      match_rule("filter forward lan0", in: 'lan0'),      # Forwarded traffic from LAN to Internet.
+      match_rule("filter forward established",            # Forward established traffic.
+                 match: 'ctstate RELATED,ESTABLISHED')
   end
 
   # MANGLE:mark_qos_band chain
@@ -125,7 +124,7 @@ loop do
       service = "iptables #{metric}"
       delta = value - $metrics[metric]
       puts "%-40s %5d" % [service, delta]
-      $riemann << {service: service, metric: delta}
+      $riemann << {service: service, metric: delta, state: "ok", ttl: 10, tags: ['net']}
     end
     $metrics[metric] = value
   end
