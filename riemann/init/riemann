@@ -1,0 +1,56 @@
+#!/sbin/runscript
+
+# This script assumes that Riemann has a user and group set up, and that the
+# service files have been extracted to `/var/lib/riemann/current`.
+#
+# Author: Greg Look (greg@mvxcvi.com)
+
+extra_started_commands="reload"
+
+CFG_DIR=/etc/riemann
+LIB_DIR=/var/lib/riemann
+RUN_DIR=/var/run/riemann
+LOG_DIR=/var/log/riemann
+
+RIEMANN_DIR=$LIB_DIR/current
+COMMAND=$RIEMANN_DIR/bin/riemann
+
+CONFIG_FILE=$CFG_DIR/riemann.config
+PIDFILE=$RUN_DIR/riemann.pid
+
+start() {
+    checkpath -d -m 0755 -o riemann:riemann $RUN_DIR
+    checkpath -d -m 0755 -o riemann:riemann $LOG_DIR
+    ebegin "Starting riemann"
+    start-stop-daemon \
+        --start \
+        --user riemann:riemann \
+        --pidfile $PIDFILE \
+        --make-pidfile \
+        --background \
+        --exec $COMMAND \
+        -- $CONFIG_FILE \
+        2>&1 > /dev/null
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping riemann"
+    start-stop-daemon \
+        --stop \
+        --pidfile $PIDFILE \
+        --exec $COMMAND
+    eend $?
+}
+
+reload() {
+    if [ ! -f $PIDFILE ]; then
+        eerror "$SVCNAME isn't running"
+        return 1
+    fi
+    ebegin "Reloading riemann configuration"
+    start-stop-daemon \
+        --signal HUP \
+        --pidfile $PIDFILE
+    eend $?
+}
