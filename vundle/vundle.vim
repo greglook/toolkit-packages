@@ -14,30 +14,27 @@ call vundle#rc()
 
 Bundle 'gmarik/vundle'
 
+" General
 Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
-
-" Clojure
-"Bundle 'tpope/vim-fireplace'
-Bundle 'guns/vim-clojure-static'
-"Bundle 'jpalardy/vim-slime'
-Bundle 'amdt/vim-niji'
-Bundle 'paredit.vim'
-
-" Coffeescript
-Bundle 'kchmck/vim-coffee-script'
 
 " Ledger
 Bundle 'ledger/vim-ledger'
 
-filetype plugin indent on
+" Coffeescript
+Bundle 'kchmck/vim-coffee-script'
 
+" Clojure
+Bundle 'guns/vim-clojure-static'
+Bundle 'amdt/vim-niji'
+Bundle 'paredit.vim'
 
-" Config
-
-let g:slime_target = "tmux"
+" SLIME
+"Bundle 'jpalardy/vim-slime'
+"let g:slime_target = "tmux"
 "let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
 
+filetype plugin indent on
 
 " Shortcuts
 
