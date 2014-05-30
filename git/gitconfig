@@ -12,7 +12,9 @@
     co = checkout
     ci = commit
     st = status
-    sl = stash list
+
+    ba = branch --all
+    bv = branch --all --verbose --verbose
 
     lg = log --color --graph --date=short --pretty=\"format:%ad %Cred%h%C(bold yellow)%d%Creset %s %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset\"
     ll = log --color --date=short --pretty=\"format:%ad %Cred%h%C(bold yellow)%d%Creset %s %C(bold blue)<%an>%Creset %Cgreen(%cr)%Creset\" --numstat
@@ -22,6 +24,9 @@
     dc = diff --cached
     dl = diff --cached HEAD^
     dr = "!f() { git diff "$1"^.."$1"; }; f"
+
+    sl = stash list
+    sp = stash pop
 
 [color]
     branch = auto
