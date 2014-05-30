@@ -20,7 +20,7 @@ Bundle 'tpope/vim-surround'
 " Clojure
 "Bundle 'tpope/vim-fireplace'
 Bundle 'guns/vim-clojure-static'
-Bundle 'jpalardy/vim-slime'
+"Bundle 'jpalardy/vim-slime'
 Bundle 'amdt/vim-niji'
 Bundle 'paredit.vim'
 
