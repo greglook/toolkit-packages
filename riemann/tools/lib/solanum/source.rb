@@ -71,16 +71,16 @@ class Source
       # Locate absolute command path.
       command, args = @config.split(/\s/, 2)
       abs_command =
-        if File.executable? command
+        if ::File.executable? command
           command
         else
           %x{which #{command} 2> /dev/null}.chomp
         end
 
       # Check, then execute command for line input.
-      if not File.exist?(abs_command)
+      if not ::File.exist?(abs_command)
         raise "Command #{command} not found"
-      elsif not File.executable?(abs_command)
+      elsif not ::File.executable?(abs_command)
         raise "Command #{abs_command} not executable"
       else
         lines = %x{#{abs_command} #{args}}.split("\n")
