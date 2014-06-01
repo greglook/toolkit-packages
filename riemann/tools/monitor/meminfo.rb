@@ -1,20 +1,17 @@
-#!/usr/bin/env ruby
-
-require_relative 'lib/solanum'
-
 # Read memory usage.
-$meminfo = read "/proc/meminfo" do
+read "/proc/meminfo" do
   match /^MemTotal:\s+(\d+) kB$/,  record: "memory total bytes",   cast: :to_i, scale: 1024
   match /^MemFree:\s+(\d+) kB$/,   record: "memory free bytes",    cast: :to_i, scale: 1024
   match /^Buffers:\s+(\d+) kB$/,   record: "memory buffers bytes", cast: :to_i, scale: 1024
   match /^Cached:\s+(\d+) kB$/,    record: "memory cached bytes",  cast: :to_i, scale: 1024
+  match /^Active:\s+(\d+) kB$/,    record: "memory active bytes",  cast: :to_i, scale: 1024
   match /^SwapTotal:\s+(\d+) kB$/, record: "swap total bytes",     cast: :to_i, scale: 1024
   match /^SwapFree:\s+(\d+) kB$/,  record: "swap free bytes",      cast: :to_i, scale: 1024
 end
 
 # Calculate percentages from total space.
-$percentages = compute do |metrics|
-  [%w{memory  free buffers cached},
+compute do |metrics|
+  [%w{memory  free buffers cached active},
    %w{swap    free}].each do |info|
     sys = info.shift
     total = metrics["#{sys} total bytes"]
@@ -22,7 +19,7 @@ $percentages = compute do |metrics|
       info.each do |stat|
         bytes = metrics["#{sys} #{stat} bytes"]
         if bytes
-          pct = 100.0*bytes/total
+          pct = bytes.to_f/total
           metrics["#{sys} #{stat} pct"] = pct
         end
       end
@@ -31,17 +28,4 @@ $percentages = compute do |metrics|
   metrics
 end
 
-##### REPORT LOOP #####
-
-require 'riemann/client'
-
-$riemann = Riemann::Client.new
-
-loop do
-  metrics = Solanum.collect($meminfo, $percentages)
-  metrics.each do |metric, value|
-    puts "%-40s %5d" % [metric, value]
-    $riemann << {service: metric, metric: value, state: "ok", ttl: 10}
-  end
-  sleep 5
-end
+service "swap free pct", state: thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")
