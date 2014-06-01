@@ -5,7 +5,7 @@ module Solanum
 #
 # Author:: Greg Look
 class Matcher
-  attr_reader :pattern, :recorder
+  attr_reader :pattern, :fn
 
   # Creates a new Matcher
   def initialize(pattern, &block)
@@ -13,7 +13,7 @@ class Matcher
     raise "block must be provided" if block.nil?
 
     @pattern = pattern
-    @recorder = block
+    @fn = block
   end
 
   # Attempts to match the given line, calling it's recorder block with the
@@ -24,7 +24,7 @@ class Matcher
     raise "metrics must be provided" if metrics.nil?
 
     if @pattern === line
-      @calc.call $~, metrics
+      @fn.call $~, metrics
     end
   end
 end

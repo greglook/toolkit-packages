@@ -10,6 +10,18 @@ module Solanum
 
   # Collects metrics from the given sources, in order. Returns a merged map of
   # metric data.
+  def self.collect(*sources)
+    sources.reduce({}) do |metrics, source|
+      new_metrics = nil
+      begin
+        new_metrics = source.collect(metrics)
+      rescue => e
+        STDERR.puts "Error collecting metrics from #{source}: #{e}"
+        raise e
+      end
+      new_metrics || metrics
+    end
+  end
 
 end
 
@@ -32,7 +44,5 @@ end
 
 # Computes metrics directly.
 def compute(&block)
-  source = Solanum::Source::Compute.new
-  source.instance_exec &block
-  source
+  Solanum::Source::Compute.new(block)
 end

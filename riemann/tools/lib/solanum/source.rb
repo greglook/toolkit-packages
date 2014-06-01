@@ -1,3 +1,5 @@
+require 'solanum/matcher'
+
 module Solanum
 
 # This class represents a source of data, whether read from command output,
@@ -21,12 +23,17 @@ class Source
 
   private
 
-  def test_lines(lines, metrics)
+  def process(lines, metrics)
     return metrics if lines.nil?
     lines.reduce(metrics) do |metrics, line|
-      @matchers.find(metrics) do |matcher|
-        matcher.match(metrics, line)
+      @matchers.each do |matcher|
+        new_metrics = matcher.match(metrics, line)
+        if new_metrics
+          metrics = new_metrics
+          break
+        end
       end
+      metrics
     end
   end
 
@@ -68,6 +75,7 @@ class Source
           command
         else
           %x{which #{command} 2> /dev/null}.chomp
+        end
 
       # Check, then execute command for line input.
       if not File.exist?(abs_command)
@@ -77,7 +85,7 @@ class Source
       else
         lines = %x{#{abs_command} #{args}}.split("\n")
         raise "Error executing command: #{abs_command} #{args}" unless $?.success?
-        match lines, metrics
+        process lines, metrics
       end
     end
   end
@@ -92,7 +100,7 @@ class Source
         file.readlines
       end
 
-      match lines, metrics
+      process lines, metrics
     end
   end
 
