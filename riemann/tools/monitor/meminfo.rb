@@ -1,22 +1,26 @@
 # Read memory usage.
 read "/proc/meminfo" do
-  match /^MemTotal:\s+(\d+) kB$/,  record: "memory total bytes",   cast: :to_i, scale: 1024
-  match /^MemFree:\s+(\d+) kB$/,   record: "memory free bytes",    cast: :to_i, scale: 1024
-  match /^Buffers:\s+(\d+) kB$/,   record: "memory buffers bytes", cast: :to_i, scale: 1024
-  match /^Cached:\s+(\d+) kB$/,    record: "memory cached bytes",  cast: :to_i, scale: 1024
-  match /^Active:\s+(\d+) kB$/,    record: "memory active bytes",  cast: :to_i, scale: 1024
-  match /^SwapTotal:\s+(\d+) kB$/, record: "swap total bytes",     cast: :to_i, scale: 1024
-  match /^SwapFree:\s+(\d+) kB$/,  record: "swap free bytes",      cast: :to_i, scale: 1024
+  match /^MemTotal:\s+(\d+) kB$/,     cast: :to_i, scale: 1024, record: "memory total bytes"
+  match /^MemFree:\s+(\d+) kB$/,      cast: :to_i, scale: 1024, record: "memory free bytes"
+  match /^MemAvailable:\s+(\d+) kB$/, cast: :to_i, scale: 1024, record: "memory available bytes"
+  match /^Buffers:\s+(\d+) kB$/,      cast: :to_i, scale: 1024, record: "memory buffers bytes"
+  match /^Cached:\s+(\d+) kB$/,       cast: :to_i, scale: 1024, record: "memory cached bytes"
+  match /^Active:\s+(\d+) kB$/,       cast: :to_i, scale: 1024, record: "memory active bytes"
+  match /^SwapTotal:\s+(\d+) kB$/,    cast: :to_i, scale: 1024, record: "swap total bytes"
+  match /^SwapFree:\s+(\d+) kB$/,     cast: :to_i, scale: 1024, record: "swap free bytes"
 end
 
 # Calculate percentages from total space.
 compute do |metrics|
-  [%w{memory  free buffers cached active},
-   %w{swap    free}].each do |info|
-    sys = info.shift
+  percentages = {
+    "memory" => %w{free available buffers cached active},
+    "swap"   => %w{free}
+  }
+
+  percentages.each do |sys, stats|
     total = metrics["#{sys} total bytes"]
     if total && total > 0
-      info.each do |stat|
+      stats.each do |stat|
         bytes = metrics["#{sys} #{stat} bytes"]
         if bytes
           pct = bytes.to_f/total
@@ -25,7 +29,9 @@ compute do |metrics|
       end
     end
   end
+
   metrics
 end
 
-service "swap free pct", state: thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")
+service "memory available pct", state: thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")
+service "swap free pct",        state: thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")

@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Hardware sensor data.
 run "sensors" do
   match /^Core 0:\s+\+(\d+\.\d+)°C/, record: "sensor coretemp", cast: :to_f
