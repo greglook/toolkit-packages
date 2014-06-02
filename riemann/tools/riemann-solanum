@@ -45,80 +45,17 @@ end
 ##### SOLANUM DSL #####
 
 require_relative 'lib/solanum'
+require_relative 'lib/solanum/dsl'
 
-# A list of all register metrics sources.
-$sources = []
 
 # A list of pairs of [matcher, prototype] where matcher is generally a string
 # or regex to match a service name, and prototype is a map of :ttl, :state,
 # :tags, etc.
 $services = []
 
-
-# Registers a new source object. If a block is given, it is used to configure
-# the source with instance_exec.
-def register_source(source, config=nil)
-  source.instance_exec &config if config
-  $sources << source
-  source
-end
-
-
-# Registers a source which runs a command and matches against output lines.
-def run(command, &config)
-  register_source Solanum::Source::Command.new(command), config
-end
-
-
-# Registers a source which matches against the lines in a file.
-def read(path, &config)
-  register_source Solanum::Source::File.new(path), config
-end
-
-
-# Registers a source which computes metrics directly.
-def compute(&block)
-  register_source Solanum::Source::Compute.new(block)
-end
-
-
 # Registers a service event prototype.
 def service(service, prototype={})
   $services << [service, prototype]
-end
-
-
-# Creates a state block based on thresholds. If the first argument is a string,
-# it is taken as the default service state. Otherwise, arguments should be
-# alternating numeric thresholds and state values to assign if the metric value
-# exceeds the threshold.
-#
-#     thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")
-#
-def thresholds(*args)
-  default_state = nil
-  default_state = args.shift if args.first.instance_of? String
-
-  # Check arguments.
-  raise "Thresholds must be paired with state values" unless args.count.even?
-  args.each_slice(2) do |threshold|
-    limit, state = *threshold
-    raise "Limits must be numeric: #{limit}" unless limit.kind_of? Numeric
-    raise "State values must be strings: #{state}" unless state.instance_of? String
-  end
-
-  # State block.
-  lambda do |v|
-    state = default_state
-    args.each_slice(2) do |threshold|
-      if threshold[0] < v
-        state = threshold[1]
-      else
-        break
-      end
-    end
-    state
-  end
 end
 
 
@@ -148,7 +85,7 @@ loop do
   metrics = Solanum.collect($sources)
   metrics.each do |service, value|
     prototype = $services.select{|m| m[0] === service }.map{|m| m[1] }.reduce({}, &:merge)
-    state = prototype[:state] ? prototype[:state].call(value) : "ok"
+    state = prototype[:state] ? prototype[:state].call(value) : :ok
     tags = ((prototype[:tags] || []) + $options[:tags]).uniq
     ttl = prototype[:ttl] || $options[:ttl]
 
@@ -166,7 +103,7 @@ loop do
       $riemann << {
         service: service,
         metric: value,
-        state: state,
+        state: state.to_s,
         tags: tags,
         ttl: ttl
       }
