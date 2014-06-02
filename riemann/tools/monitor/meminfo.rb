@@ -33,5 +33,5 @@ compute do |metrics|
   metrics
 end
 
-service "memory available pct", state: thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")
-service "swap free pct",        state: thresholds(0.00, "critical", 0.10, "warning", 0.25, "ok")
+service "memory available pct", state: thresholds(0.00, :critical, 0.10, :warning, 0.25, :ok)
+service "swap free pct",        state: thresholds(0.00, :critical, 0.10, :warning, 0.25, :ok)
