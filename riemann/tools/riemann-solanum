@@ -47,39 +47,45 @@ end
 
 require_relative 'lib/solanum'
 
+# A list of all register metrics sources.
 $sources = []
-$services = {}  # maps service names to a map of tags, ttl, state fn, etc.
+
+# A list of pairs of [matcher, prototype] where matcher is generally a string
+# or regex to match a service name, and prototype is a map of :ttl, :state,
+# :tags, etc.
+$services = []
 
 
-# Registers a source which runs a command and matches against output lines.
-def run(command, &block)
-  source = Solanum::Source::Command.new(command)
-  source.instance_exec &block
+# Registers a new source object. If a block is given, it is used to configure
+# the source with instance_exec.
+def register_source(source, config=nil)
+  source.instance_exec &config if config
   $sources << source
   source
 end
 
 
+# Registers a source which runs a command and matches against output lines.
+def run(command, &config)
+  register_source Solanum::Source::Command.new(command), config
+end
+
+
 # Registers a source which matches against the lines in a file.
-def read(path, &block)
-  source = Solanum::Source::File.new(path)
-  source.instance_exec &block
-  $sources << source
-  source
+def read(path, &config)
+  register_source Solanum::Source::File.new(path), config
 end
 
 
 # Registers a source which computes metrics directly.
 def compute(&block)
-  source = Solanum::Source::Compute.new(block)
-  $sources << source
-  source
+  register_source Solanum::Source::Compute.new(block)
 end
 
 
 # Registers a service event prototype.
 def service(service, prototype={})
-  $services[service] = prototype
+  $services << [service, prototype]
 end
 
 
@@ -135,24 +141,36 @@ end
 require 'riemann/client'
 
 $riemann = Riemann::Client.new host: $options[:riemann_host], port: $options[:riemann_port]
+$metrics = {}
 
 loop do
   metrics = Solanum.collect($sources)
   metrics.each do |service, value|
-    prototype = $services[service] || {}
+    prototype = $services.select{|m| m[0] === service }.map{|m| m[1] }.reduce({}, &:merge)
     state = prototype[:state] ? prototype[:state].call(value) : "ok"
     tags = ((prototype[:tags] || []) + $options[:tags]).uniq
     ttl = prototype[:ttl] || $options[:ttl]
 
-    log "%-40s %5s (%s) %s" % [service, value, state.nil? ? "--" : state, tags.join(' ')]
+    if prototype[:diff]
+      last = $metrics[service]
+      if last && last <= value
+        value = value - last
+      else
+        value = nil
+      end
+    end
 
-    $riemann << {
-      service: service,
-      metric: value,
-      state: state,
-      tags: tags,
-      ttl: ttl
-    }
+    if value
+      log "%-40s %5s (%s) %s" % [service, value, state.nil? ? "--" : state, tags.join(' ')]
+      $riemann << {
+        service: service,
+        metric: value,
+        state: state,
+        tags: tags,
+        ttl: ttl
+      }
+    end
   end
+  $metrics = metrics
   sleep $options[:interval]
 end
