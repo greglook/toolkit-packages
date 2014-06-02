@@ -24,7 +24,7 @@ options = OptionParser.new do |opts|
   opts.on('-t', '--tag TAG', "Tag to add to events (may be given multiple times)") {|v| $options[:tags] << v }
   opts.on('-l', '--ttl SECONDS', "Default TTL for events (default: #{$options[:ttl]})") {|v| $options[:ttl] = v.to_i }
   opts.on('-v', '--verbose', "Print additional information to stdout") { $options[:verbose] = true }
-  opts.on('--help', "Displays usage information") { print opts; exit }
+  opts.on(      '--help', "Displays usage information") { print opts; exit }
 end
 options.parse!
 
@@ -36,14 +36,13 @@ end
 
 $scripts = ARGV.dup
 
-
 def log(msg)
   puts msg if $options[:verbose]
 end
 
 
 
-##### SOLANUM CONFIGS #####
+##### SOLANUM DSL #####
 
 require_relative 'lib/solanum'
 
@@ -103,9 +102,8 @@ def thresholds(*args)
   # Check arguments.
   raise "Thresholds must be paired with state values" unless args.count.even?
   args.each_slice(2) do |threshold|
-    limit = threshold[0]
+    limit, state = *threshold
     raise "Limits must be numeric: #{limit}" unless limit.kind_of? Numeric
-    state = threshold[1]
     raise "State values must be strings: #{state}" unless state.instance_of? String
   end
 
@@ -123,6 +121,9 @@ def thresholds(*args)
   end
 end
 
+
+
+##### MONITORING CONFIGS #####
 
 $scripts.each do |path|
   log "Loading monitor script #{path}"
