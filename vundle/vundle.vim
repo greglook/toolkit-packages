@@ -15,8 +15,9 @@ call vundle#rc()
 Bundle 'gmarik/vundle'
 
 " General
-Bundle 'tpope/vim-fugitive'
+"Bundle 'tpope/vim-fugitive'
 Bundle 'tpope/vim-surround'
+Bundle 'scrooloose/nerdtree'
 
 " Ledger
 Bundle 'ledger/vim-ledger'
@@ -38,7 +39,10 @@ filetype plugin indent on
 
 " Shortcuts
 
+" NERDTree
+map <C-n> :NERDTreeToggle<CR>
+
 " fugitive shortcuts
-nnoremap <leader>gs :Gstatus<cr>
-nnoremap <leader>gd :Gdiff<cr>
-nnoremap <leader>gl :Glog<cr>
+"nnoremap <leader>gs :Gstatus<cr>
+"nnoremap <leader>gd :Gdiff<cr>
+"nnoremap <leader>gl :Glog<cr>
