@@ -70,8 +70,8 @@ TIMEFMT=" Elapsed: %*E User: %U Kernel: %*S"
 
 ##### KEY BINDINGS #####
 
-# use vim-style key bindings
-bindkey -v
+# use emacs-style key bindings
+bindkey -e
 
 # home/end (PuTTY/OS X)
 bindkey '^[[1~'   beginning-of-line
