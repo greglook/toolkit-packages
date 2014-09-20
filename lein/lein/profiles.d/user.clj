@@ -14,8 +14,8 @@
   [lein-hiera "0.9.0-SNAPSHOT"]
   [lein-kibit "0.0.8"]
   [lein-vanity "0.2.0"]
-  [com.jakemccrary/lein-test-refresh "0.3.9"]
-  [jonase/eastwood "0.1.0"]]
+  [com.jakemccrary/lein-test-refresh "0.5.3"]
+  [jonase/eastwood "0.1.4"]]
 
  :injections
  [(let [orig (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
@@ -26,6 +26,6 @@
  {:init (do (require '[clj-stacktrace.repl :refer [pst+]]))}
 
  :hiera
+ ^:displace
  {:show-external? true
-  :vertical? false
   :ignore-ns #{clojure user}}}
