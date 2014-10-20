@@ -29,7 +29,7 @@ fi
 echo "Initializing Clojure workspace '$SESSION' at $PROJECT_ROOT"
 
 # Initialize workspace
-tmux -2 new-session -d -s $SESSION
+tmux -2 new-session -d -s $SESSION -c "$PROJECT_ROOT"
 
 tmux new-window -t "$SESSION:0" -n 'misc' -c "$HOME" -k
 
