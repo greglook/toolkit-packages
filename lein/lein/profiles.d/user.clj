@@ -9,21 +9,21 @@
 
  :plugins
  [[lein-ancient "0.5.5"]
+  [lein-clique "0.1.2"]
   [lein-cloverage "1.0.2"]
   [lein-cprint "1.0.0"]
   [lein-hiera "0.9.0-SNAPSHOT"]
   [lein-kibit "0.0.8"]
+  [lein-marginalia "0.8.0"]
+  [lein-midje "3.1.3"]
   [lein-vanity "0.2.0"]
   [com.jakemccrary/lein-test-refresh "0.5.3"]
   [jonase/eastwood "0.1.4"]]
 
  :injections
- [(let [orig (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
-        new  (ns-resolve (doto 'clj-stacktrace.repl require) 'pst+)]
-    (alter-var-root orig (constantly (deref new))))]
-
- :repl-options
- {:init (do (require '[clj-stacktrace.repl :refer [pst+]]))}
+ [(let [pct-var (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
+        pst-var (ns-resolve (doto 'clj-stacktrace.repl require) 'pst+)]
+    (alter-var-root pct-var (constantly (deref pst-var))))]
 
  :hiera
  ^:displace
