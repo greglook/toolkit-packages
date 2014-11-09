@@ -33,16 +33,16 @@ tmux -2 new-session -d -s $SESSION -c "$PROJECT_ROOT"
 
 tmux new-window -t "$SESSION:0" -n 'misc' -c "$HOME" -k
 
-tmux new-window -t "$SESSION:1" -n 'git' -c "$PROJECT_ROOT"
+tmux new-window -t "$SESSION:1" -n 'build' -c "$PROJECT_ROOT"
 
 tmux new-window -t "$SESSION:2" -n 'repl' -c "$PROJECT_ROOT/src/$NAMESPACE"
-tmux send-keys -t "$SESSION:2" "lein trampoline repl" # C-m
+#tmux send-keys -t "$SESSION:2" "lein trampoline repl" C-m
 
 tmux new-window -t "$SESSION:3" -n 'src' -c "$PROJECT_ROOT/src/$NAMESPACE"
 
 tmux new-window -t "$SESSION:4" -n 'test' -c "$PROJECT_ROOT/test/$NAMESPACE"
 tmux split-window -t "$SESSION:4" -h -c "$PROJECT_ROOT"
-tmux send-keys -t "$SESSION:4.1" "lein test-refresh" # C-m
+#tmux send-keys -t "$SESSION:4.1" "lein test-refresh" C-m
 
 tmux new-window -t "$SESSION:5" -n 'doc'  -c "$PROJECT_ROOT/doc"
 
