@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+# Generate a secure random string of a certain length.
+
+require 'securerandom'
+
+length = ARGV.empty? && 32 || ARGV.first
+puts SecureRandom.hex(length)
