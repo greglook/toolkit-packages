@@ -12,7 +12,7 @@
   [lein-clique "0.1.2"]
   [lein-cloverage "1.0.2"]
   [lein-cprint "1.0.0"]
-  [lein-hiera "0.8.0"]
+  [lein-hiera "0.9.0"]
   [lein-kibit "0.0.8"]
   [lein-marginalia "0.8.0"]
   [lein-midje "3.1.3"]
