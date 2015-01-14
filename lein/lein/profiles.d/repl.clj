@@ -1,5 +1,5 @@
 {:plugins
- [[mvxcvi/whidbey "0.4.1"]]
+ [[mvxcvi/whidbey "0.4.2"]]
 
  :puget-options
  {:width 200
