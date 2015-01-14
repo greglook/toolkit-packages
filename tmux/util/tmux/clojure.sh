@@ -10,7 +10,20 @@ if [[ -z "$1" ]]; then
     exit 1
 fi
 
-PROJECT_ROOT=$1
+# Recurse into subdirectories and print the first one containing multiple
+# children. This can be used to traverse common namespace chains in source
+# hierarchies.
+seek_into() {
+    d=$1
+    while [[ -d $d ]]; do
+        c=($d/*)
+        [[ ${#c[@]} -ne 1 ]] && break
+        d="${c[1]}"
+    done
+    echo $d
+}
+
+PROJECT_ROOT=$(cd $1 && pwd)
 SESSION=${2:-$(basename $PROJECT_ROOT)}
 NAMESPACE=$(echo $3 | tr '.-' '/_')
 
@@ -27,20 +40,21 @@ if tmux has-session -t $SESSION 2> /dev/null; then
 fi
 
 echo "Initializing Clojure workspace '$SESSION' at $PROJECT_ROOT"
+cd $PROJECT_ROOT
 
 # Initialize workspace
-tmux -2 new-session -d -s $SESSION -c "$PROJECT_ROOT"
+tmux -2 new-session -d -s $SESSION #-c "$PROJECT_ROOT"
 
 tmux new-window -t "$SESSION:0" -n 'misc' -c "$HOME" -k
 
 tmux new-window -t "$SESSION:1" -n 'build' -c "$PROJECT_ROOT"
 
-tmux new-window -t "$SESSION:2" -n 'repl' -c "$PROJECT_ROOT/src/$NAMESPACE"
-#tmux send-keys -t "$SESSION:2" "lein trampoline repl" C-m
+tmux new-window -t "$SESSION:2" -n 'repl' -c "$PROJECT_ROOT"
+#tmux send-keys -t "$SESSION:2" "lein repl" C-m
 
-tmux new-window -t "$SESSION:3" -n 'src' -c "$PROJECT_ROOT/src/$NAMESPACE"
+tmux new-window -t "$SESSION:3" -n 'src' -c "$(seek_into "$PROJECT_ROOT/src")"
 
-tmux new-window -t "$SESSION:4" -n 'test' -c "$PROJECT_ROOT/test/$NAMESPACE"
+tmux new-window -t "$SESSION:4" -n 'test' -c "$(seek_into "$PROJECT_ROOT/test")"
 tmux split-window -t "$SESSION:4" -h -c "$PROJECT_ROOT"
 #tmux send-keys -t "$SESSION:4.1" "lein test-refresh" C-m
 
@@ -49,4 +63,5 @@ tmux new-window -t "$SESSION:5" -n 'doc'  -c "$PROJECT_ROOT/doc"
 # Attach to session
 tmux select-window -t "$SESSION:3"
 tmux select-window -t "$SESSION:1"
-tmux attach -t "$SESSION"
+
+exec tmux attach -t "$SESSION"
