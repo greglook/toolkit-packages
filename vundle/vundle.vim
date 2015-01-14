@@ -5,36 +5,39 @@
 " 2) Load Vundle in ~/.vimrc:
 " source ~/.vim/vundle.vim
 "
-" 3) Run :BundleInstall in vim.
+" 3) Run :PluginInstall in vim.
 
 filetype off
 
 set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
+call vundle#begin()
 
-Bundle 'gmarik/vundle'
+Plugin 'gmarik/vundle'
 
 " General
-"Bundle 'tpope/vim-fugitive'
-Bundle 'tpope/vim-surround'
-Bundle 'scrooloose/nerdtree'
+"Plugin 'tpope/vim-fugitive'
+Plugin 'tpope/vim-surround'
+Plugin 'scrooloose/nerdtree'
 
 " Ledger
-Bundle 'ledger/vim-ledger'
+Plugin 'ledger/vim-ledger'
 
 " Coffeescript
-Bundle 'kchmck/vim-coffee-script'
+Plugin 'kchmck/vim-coffee-script'
 
 " Clojure
-Bundle 'guns/vim-clojure-static'
-Bundle 'amdt/vim-niji'
-Bundle 'paredit.vim'
+Plugin 'guns/vim-clojure-static'
+Plugin 'amdt/vim-niji'
+Plugin 'paredit.vim'
 
 " SLIME
-"Bundle 'jpalardy/vim-slime'
+"Plugin 'jpalardy/vim-slime'
 "let g:slime_target = "tmux"
 "let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
 
+Plugin 'docker/docker', {'rtp': '/contrib/syntax/vim/'}
+
+call vundle#end()
 filetype plugin indent on
 
 " Shortcuts
