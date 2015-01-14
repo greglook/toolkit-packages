@@ -4,5 +4,5 @@
 
 require 'securerandom'
 
-length = ARGV.empty? && 32 || ARGV.first
+length = ARGV.empty? && 32 || ARGV.first.to_i
 puts SecureRandom.hex(length)
