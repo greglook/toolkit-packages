@@ -16,8 +16,7 @@
   [lein-kibit "0.0.8"]
   [lein-marginalia "0.8.0"]
   [lein-vanity "0.2.0"]
-  #_ [mvxcvi/whidbey "1.0.0"]
-  ]
+  [mvxcvi/whidbey "1.0.0"]]
 
  :dependencies
  [[clj-stacktrace "0.2.7"]
@@ -25,14 +24,7 @@
   [org.clojure/tools.namespace "0.2.8"]
   [org.clojure/tools.trace "0.7.8"]]
 
-  :ultra {:repl         true
-          :stacktraces  true
-          :tests        true
-          :java         false}
-
- #_
  :injections
- #_
  [(let [pct-var (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
         pst-var (ns-resolve (doto 'clj-stacktrace.repl require) 'pst+)]
     (alter-var-root pct-var (constantly (deref pst-var))))]
