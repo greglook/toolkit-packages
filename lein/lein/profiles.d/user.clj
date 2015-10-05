@@ -32,8 +32,7 @@
  :whidbey
  {:width 200
   :map-delimiter ","
-  :escape-types '#{clj_http.headers.HeaderMap}
-  }
+  :escape-types '#{clj_http.headers.HeaderMap}}
 
  :codox
  {:defaults {:doc/format :markdown}
