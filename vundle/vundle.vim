@@ -18,6 +18,7 @@ Plugin 'gmarik/vundle'
 "Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-surround'
 Plugin 'scrooloose/nerdtree'
+Plugin 'cespare/vim-toml'
 
 " Ledger
 Plugin 'ledger/vim-ledger'
