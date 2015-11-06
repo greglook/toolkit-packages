@@ -1,7 +1,8 @@
 {:aliases
  {"doc-lit" ^:displace ["marg" "--dir" "doc/marginalia"]
-  "docs" ["do" ["codox"] ["doc-lit"] ["hiera"]]
-  "tests" ["do" ["check"] ["test"] ["cloverage"]]
+  "docs" ^:displace ["do" ["codox"] ["doc-lit"] ["hiera"]]
+  "coverage" ^:displace ["cloverage"]
+  "tests" ["do" ["check"] ["test"] ["coverage"]]
   "slamhound" ["run" "-m" "slam.hound"]}
 
  :plugins
@@ -15,7 +16,7 @@
   [lein-kibit "0.1.2"]
   [lein-marginalia "0.8.0"]
   [lein-vanity "0.2.0"]
-  [mvxcvi/whidbey "1.2.0"]]
+  [mvxcvi/whidbey "1.3.0"]]
 
  :dependencies
  [[clj-stacktrace "0.2.8"]
@@ -40,5 +41,5 @@
 
  :hiera
  {:path "doc/ns-hiera.png"
-  :show-external? true
+  ;:show-external true
   :ignore-ns #{clojure user}}}
