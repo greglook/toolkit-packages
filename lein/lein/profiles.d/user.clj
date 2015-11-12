@@ -30,14 +30,10 @@
     (alter-var-root pct-var (constantly (deref pst-var))))]
 
  :whidbey
- {:width 200
-  :map-delimiter ","}
-
- :codox
- {:defaults {:doc/format :markdown}
-  :exclude #{user}
-  :output-dir "doc/api"
-  :src-linenum-anchor-prefix "L"}
+ {:width 150
+  :map-delimiter ","
+  :color-scheme {:nil [:blue]}
+  :tag-types {java.lang.Class {'class #(symbol (.getName %))}}}
 
  :hiera
  ^:displace
