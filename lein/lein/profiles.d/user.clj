@@ -11,8 +11,8 @@
   [lein-ancient "0.6.7"]
   [lein-cloverage "1.0.6"]
   [lein-codox "0.9.0"]
-  [lein-cprint "1.1.0"]
-  [lein-hiera "0.9.0"]
+  [lein-cprint "1.2.0"]
+  [lein-hiera "0.9.5"]
   [lein-kibit "0.1.2"]
   [lein-marginalia "0.8.0"]
   [lein-vanity "0.2.0"]
@@ -40,6 +40,6 @@
   :src-linenum-anchor-prefix "L"}
 
  :hiera
- {:path "doc/ns-hiera.png"
-  ;:show-external true
+ ^:displace
+ {:show-external true
   :ignore-ns #{clojure user}}}
