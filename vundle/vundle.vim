@@ -19,6 +19,7 @@ Plugin 'gmarik/vundle'
 Plugin 'tpope/vim-surround'
 Plugin 'scrooloose/nerdtree'
 Plugin 'cespare/vim-toml'
+Plugin 'docker/docker', {'rtp': '/contrib/syntax/vim/'}
 
 " Ledger
 Plugin 'ledger/vim-ledger'
@@ -31,12 +32,6 @@ Plugin 'guns/vim-clojure-static'
 Plugin 'amdt/vim-niji'
 Plugin 'paredit.vim'
 
-" SLIME
-"Plugin 'jpalardy/vim-slime'
-"let g:slime_target = "tmux"
-"let g:slime_default_config = {"socket_name": "default", "target_pane": "1"}
-
-Plugin 'docker/docker', {'rtp': '/contrib/syntax/vim/'}
 
 call vundle#end()
 filetype plugin indent on
