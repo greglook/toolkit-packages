@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# This script produces a listing of files and the hash of their contents. By
+# default, it uses the current directory, or one may be provided as the first
+# argument.
+#
+# The paths in the file listing are truncated to be relative paths from the
+# given location. For example, invoking the script with `/foo/bar` as the
+# argument would produce a line of output for `foo/bar/baz/abc.py` like:
+#
+#     dfa1b0b6ef47a15c600b094a93e56002 baz/abc.py
+#
+# This is so that the same file tree produces the same output, regardless of
+# the location in the filesystem.
+
+
+PATTERN='.*'
+HASH_COMMAND=md5sum
+
+
+hash_tree() {
+    find $1 -type f \
+        | grep -E "$PATTERN" \
+        | LC_COLLATE=C sort \
+        | while read file; do $HASH_COMMAND "$file"; done \
+        | sed -e "s| \\+[^ ]*${1%/}/| |"
+}
+
+
+if [[ -z $1 ]]; then
+    hash_tree $PWD
+else
+    for root in "$@"; do
+        hash_tree "$root"
+    done
+fi
