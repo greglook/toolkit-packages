@@ -12,7 +12,7 @@ package 'cygwin',    :when => file?('/Cygwin.bat'), :dotfiles => true
 package 'solarized', :dotfiles => ['vim', 'zsh']
 
 # application settings
-package 'git',     :when => installed?('git'),  :dotfiles => true
+package 'git',     :when => installed?('git'),  :into => '.config/git'
 package 'tmux',    :when => installed?('tmux'), :dotfiles => ['tmux.conf', 'zsh']
 package 'vim',     :when => installed?('vim'),  :dotfiles => true
 package 'vundle',  :into => '.vim'
