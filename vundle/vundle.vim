@@ -29,7 +29,7 @@ Plugin 'kchmck/vim-coffee-script'
 
 " Clojure
 Plugin 'guns/vim-clojure-static'
-Plugin 'amdt/vim-niji'
+Plugin 'raymond-w-ko/vim-niji'
 Plugin 'paredit.vim'
 
 
