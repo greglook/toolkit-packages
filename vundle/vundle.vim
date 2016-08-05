@@ -15,22 +15,20 @@ call vundle#begin()
 Plugin 'gmarik/vundle'
 
 " General
-"Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-surround'
 Plugin 'scrooloose/nerdtree'
-Plugin 'cespare/vim-toml'
-Plugin 'docker/docker', {'rtp': '/contrib/syntax/vim/'}
-
-" Ledger
-Plugin 'ledger/vim-ledger'
-
-" Coffeescript
-Plugin 'kchmck/vim-coffee-script'
 
 " Clojure
 Plugin 'guns/vim-clojure-static'
 Plugin 'raymond-w-ko/vim-niji'
 Plugin 'paredit.vim'
+
+" Other syntax
+Plugin 'ledger/vim-ledger'
+Plugin 'kchmck/vim-coffee-script'
+Plugin 'cespare/vim-toml'
+Plugin 'docker/docker', {'rtp': '/contrib/syntax/vim/'}
+Plugin 'solarnz/thrift.vim'
 
 
 call vundle#end()
@@ -40,8 +38,3 @@ filetype plugin indent on
 
 " NERDTree
 map <C-n> :NERDTreeToggle<CR>
-
-" fugitive shortcuts
-"nnoremap <leader>gs :Gstatus<cr>
-"nnoremap <leader>gd :Gdiff<cr>
-"nnoremap <leader>gl :Glog<cr>
