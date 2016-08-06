@@ -2,37 +2,23 @@
  {"doc-lit" ^:displace ["marg" "--dir" "doc/marginalia"]
   "docs" ^:displace ["do" ["codox"] ["doc-lit"] ["hiera"]]
   "coverage" ^:displace ["cloverage"]
-  "tests" ["do" ["check"] ["test"] ["coverage"]]
-  "slamhound" ["run" "-m" "slam.hound"]}
+  "tests" ["with-profile" "+repl-tools" "do" ["check"] ["test"] ["coverage"]]
+  "slamhound" ["with-profile" "+repl-tools" "run" "-m" "slam.hound"]}
 
  :plugins
- [[com.jakemccrary/lein-test-refresh "0.16.0"
-   :exclusions [org.clojure/clojure]]
-  [lein-ancient "0.6.10"
-   :exclusions [org.clojure/clojure]]
-  [lein-codox "0.9.5"
-   :exclusions [org.clojure/clojure]]
-  [lein-cprint "1.2.0"
-   :exclusions [org.clojure/clojure]]
-  [lein-hiera "0.9.5"
-   :exclusions [org.clojure/clojure]]
+ [[com.jakemccrary/lein-test-refresh "0.16.0"]
+  [lein-ancient "0.6.10"]
+  [lein-cljfmt "0.5.3"]
+  [lein-codox "0.9.5"]
+  [lein-cprint "1.2.0"]
+  [lein-hiera "0.9.5"]
+  [lein-kibit "0.1.2"]
+  [lein-vanity "0.2.0"]
+  [michaelblume/lein-marginalia "0.9.0"]
+  [rfkm/lein-cloverage "1.0.8"]
   [michaelblume/lein-marginalia "0.9.0"
-   :exclusions [org.clojure/clojure]]
-  [lein-vanity "0.2.0"
-   :exclusions [org.clojure/clojure]]
-  [mvxcvi/whidbey "1.3.0"
-   :exclusions [org.clojure/clojure]]
-  [rfkm/lein-cloverage "1.0.8"
-   :exclusions [org.clojure/clojure]]]
-
- :dependencies
- [[clj-stacktrace "0.2.8"]
-  [slamhound "1.5.5"]]
-
- :injections
- [(let [pct-var (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
-        pst-var (ns-resolve (doto 'clj-stacktrace.repl require) 'pst+)]
-    (alter-var-root pct-var (constantly (deref pst-var))))]
+   :exclusions [org.clojure/clojurescript]]
+  [mvxcvi/whidbey "1.3.0"]]
 
  :whidbey
  {:width 150
