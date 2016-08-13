@@ -6,7 +6,8 @@
   "slamhound" ["with-profile" "+repl-tools" "run" "-m" "slam.hound"]}
 
  :plugins
- [[com.jakemccrary/lein-test-refresh "0.16.0"]
+ [[org.clojure/clojure "1.8.0"]
+  [com.jakemccrary/lein-test-refresh "0.16.0"]
   [lein-ancient "0.6.10"]
   [lein-cljfmt "0.5.3"]
   [lein-codox "0.9.5"]
