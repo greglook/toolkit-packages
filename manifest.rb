@@ -25,3 +25,4 @@ package 'rbenv', :when => file?(ENV['HOME'], '.rbenv'), :dotfiles => true
 # misc packages
 package 'gentoo', :into => 'admin/gentoo'
 package 'gtd',    :dotfiles => ['vim']
+package 'ubuntu', :into => 'admin/ubuntu'
