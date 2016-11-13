@@ -1,0 +1,104 @@
+#!/usr/bin/env ruby
+
+# This script calculates diffs between two trees of files. The left and right
+# sides are compared for files or directories on only one side or another.
+# Directories on both sides are compared recursively, and files on both sides
+# are compared for content.
+
+require 'optparse'
+require 'digest/sha1'
+
+$verbose = false
+
+# Helper method to abort the script.
+def fail(msg, code=1)
+  STDERR.puts msg
+  exit code
+end
+
+# Parse command-line options.
+options = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] <left-dir> <right-dir>"
+  opts.on('-v', '--verbose', "Show more output") { $verbose = true }
+  opts.on('-h', '--help', "Print these options") { puts opts; exit }
+end
+options.parse!
+
+if ARGV.count < 2
+  fail options
+elsif ARGV.count > 2
+  STDERR.puts "Too many arguments!"
+  fail options
+end
+
+left = ARGV[0]
+right = ARGV[1]
+
+def file_type(f)
+  if f.nil? || ! File.exists?(f)
+    :absent
+  elsif File.directory? f
+    :directory
+  elsif File.file? f
+    :file
+  else
+    :other
+  end
+end
+
+# Computes the hex-encoded SHA-1 of the given file.
+def file_hash(f)
+  Digest::SHA1.hexdigest(File.read(f))
+end
+
+def dir_children(d)
+  Dir.entries(d).reject {|x| ['.', '..'].include? x }
+end
+
+# Returns a sequence of pairs of file paths to compare by taking the union of
+# the entries in the two directories.
+def child_pairs(l, r)
+  (dir_children(l) + dir_children(r)).uniq.sort.map {|p| [File.join(l, p), File.join(r, p)] }
+end
+
+def compare_tree(l, r)
+  lt = file_type(l)
+  rt = file_type(r)
+  if lt == :absent && rt == :absent
+    # neither file exists
+    puts "???? #{l} <> #{r} both absent"
+  elsif rt == :absent
+    # file only on left side
+    puts "- #{l} (#{lt})"
+  elsif lt == :absent
+    # file only on right side
+    puts "+ #{r} (#{rt})"
+  elsif lt != rt
+    # file types don't match
+    puts "- #{l} (#{lt})"
+    puts "+ #{r} (#{rt})"
+  elsif lt == :file
+    # both files
+    lh = file_hash(l)
+    rh = file_hash(r)
+    if lh != rh
+      puts "- #{lh} #{l}"
+      puts "+ #{rh} #{r}"
+      puts `diff -u #{l} #{r}`
+    elsif $verbose
+      puts "  #{lh} #{l}"
+    end
+  elsif lt == :directory
+    # both directories
+    child_pairs(l, r).each do |pair|
+      compare_tree pair[0], pair[1]
+    end
+  else
+    # don't know how to compare
+    puts "Don't know how to compare #{l} to #{r} (#{lt})"
+  end
+end
+
+
+puts "Comparing #{left} <=> #{right}"
+compare_tree left, right
