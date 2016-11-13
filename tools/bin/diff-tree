@@ -8,7 +8,44 @@
 require 'optparse'
 require 'digest/sha1'
 
+$diff_command = 'diff -u'
+$full_hash = false
 $verbose = false
+
+# Parse command-line options.
+options = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] <left-dir> <right-dir>"
+  opts.on('-d', '--diff CMD', "Set the command to use to diff files (default: '#{$diff_command}')") {|cmd| $diff_command = cmd }
+  opts.on('-f', '--full-hash', "Show the full SHA digest of files") { $full_hash = true }
+  opts.on('-v', '--verbose', "Show more output") { $verbose = true }
+  opts.on('-h', '--help', "Print these options") { puts opts; exit }
+end
+options.parse!
+
+
+##### HELPER FUNCTIONS #####
+
+COLORS = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white].freeze
+
+# Apply ANSI color codes to the given text.
+def colorize(text, *colors)
+  sgr = "\e[%sm"
+  none = 0
+  bold = 1
+  fg = 30
+
+  codes = colors.map do |k|
+    if k == :bold
+      bold
+    else
+      i = COLORS.index {|c| c == k }
+      raise "No such color: #{k}" unless i
+      fg + i
+    end
+  end
+
+  [sgr % codes.join(';'), text, sgr % none].join
+end
 
 # Helper method to abort the script.
 def fail(msg, code=1)
@@ -16,24 +53,10 @@ def fail(msg, code=1)
   exit code
 end
 
-# Parse command-line options.
-options = OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename($0)} [options] <left-dir> <right-dir>"
-  opts.on('-v', '--verbose', "Show more output") { $verbose = true }
-  opts.on('-h', '--help', "Print these options") { puts opts; exit }
-end
-options.parse!
 
-if ARGV.count < 2
-  fail options
-elsif ARGV.count > 2
-  STDERR.puts "Too many arguments!"
-  fail options
-end
+##### FILE COMPARISON #####
 
-left = ARGV[0]
-right = ARGV[1]
-
+# Determine what category of file is at path `f`.
 def file_type(f)
   if f.nil? || ! File.exists?(f)
     :absent
@@ -46,7 +69,7 @@ def file_type(f)
   end
 end
 
-# Computes the hex-encoded SHA-1 of the given file.
+# Computes the hex-encoded SHA-1 of the file at path `f`.
 def file_hash(f)
   Digest::SHA1.hexdigest(File.read(f))
 end
@@ -56,49 +79,91 @@ def dir_children(d)
 end
 
 # Returns a sequence of pairs of file paths to compare by taking the union of
-# the entries in the two directories.
+# the entries in the two directories `l` and `r`.
 def child_pairs(l, r)
   (dir_children(l) + dir_children(r)).uniq.sort.map {|p| [File.join(l, p), File.join(r, p)] }
 end
 
-def compare_tree(l, r)
+# Render a tree node as text.
+def render_node(prefix, type, path, hash=nil)
+  spacer = ' ' * ($full_hash ? 40 : 7)
+  rel_path = path.slice((prefix.length + 1)..path.length)
+  case type
+  when :absent
+    nil
+  when :file
+    hash ||= file_hash(path)
+    hash = hash.slice(0..6) unless $full_hash
+    "#{hash} #{rel_path}"
+  when :directory
+    "#{spacer} #{rel_path}/"
+  else
+    "#{spacer} #{rel_path} (#{type})"
+  end
+end
+
+# Recursively compares the two directory trees, printing out any differences
+# discovered. Returns true if the two trees match, otherwise returns false.
+def compare_tree(lroot, rroot, l, r)
   lt = file_type(l)
   rt = file_type(r)
   if lt == :absent && rt == :absent
     # neither file exists
-    puts "???? #{l} <> #{r} both absent"
+    puts colorize("???? #{l} <> #{r} both absent", :magenta)
+    true
   elsif rt == :absent
     # file only on left side
-    puts "- #{l} (#{lt})"
+    puts colorize("- #{render_node(lroot, lt, l)}", :red)
+    false
   elsif lt == :absent
     # file only on right side
-    puts "+ #{r} (#{rt})"
+    puts colorize("+ #{render_node(rroot, rt, r)}", :green)
+    false
   elsif lt != rt
     # file types don't match
-    puts "- #{l} (#{lt})"
-    puts "+ #{r} (#{rt})"
+    puts colorize("- #{render_node(lroot, lt, l)}", :red)
+    puts colorize("+ #{render_node(rroot, rt, r)}", :green)
+    false
   elsif lt == :file
     # both files
     lh = file_hash(l)
     rh = file_hash(r)
-    if lh != rh
-      puts "- #{lh} #{l}"
-      puts "+ #{rh} #{r}"
-      puts `diff -u #{l} #{r}`
-    elsif $verbose
-      puts "  #{lh} #{l}"
+    if lh == rh
+      puts colorize("  #{render_node(lroot, lt, l, lh)}", :cyan) if $verbose
+      true
+    else
+      puts colorize("- #{render_node(lroot, lt, l, lh)}", :red)
+      puts colorize("+ #{render_node(rroot, rt, r, rh)}", :green)
+      puts `#{$diff_command} #{l} #{r}`
+      false
     end
   elsif lt == :directory
     # both directories
-    child_pairs(l, r).each do |pair|
-      compare_tree pair[0], pair[1]
-    end
+    child_pairs(l, r).map do |pair|
+      compare_tree(lroot, rroot, pair[0], pair[1])
+    end.all?
   else
     # don't know how to compare
-    puts "Don't know how to compare #{l} to #{r} (#{lt})"
+    puts colorize("Don't know how to compare #{l} to #{r} (#{lt})", :magenta)
+    false
   end
 end
 
 
+##### SCRIPT EXECUTOIN #####
+
+# Check number of arguments.
+if ARGV.count < 2
+  fail options
+elsif ARGV.count > 2
+  STDERR.puts "Too many arguments!"
+  fail options
+end
+
+left = ARGV[0]
+right = ARGV[1]
+
+# Run comparison.
 puts "Comparing #{left} <=> #{right}"
-compare_tree left, right
+match = compare_tree(left, right, left, right)
+exit match ? 0 : 1
