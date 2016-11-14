@@ -11,7 +11,7 @@
   [com.jakemccrary/lein-test-refresh "0.16.0"]
   [mvxcvi/whidbey "1.3.1"]
   [lein-ancient "0.6.10"]
-  [lein-cljfmt "0.5.3"]
+  [lein-cljfmt "0.5.5"]
   [lein-codox "0.9.5"]
   [lein-cprint "1.2.0"]
   [lein-hiera "0.9.5"]
@@ -21,6 +21,13 @@
   [rfkm/lein-cloverage "1.0.8"]
   [michaelblume/lein-marginalia "0.9.0"
    :exclusions [org.clojure/clojurescript]]]
+
+ :dependencies
+ [[pjstadig/humane-test-output "0.8.0"]]
+
+ :injections
+ [(require 'pjstadig.humane-test-output)
+  (pjstadig.humane-test-output/activate!)]
 
  :whidbey
  {:width 150
