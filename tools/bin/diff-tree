@@ -8,15 +8,15 @@
 require 'optparse'
 require 'digest/sha1'
 
-$diff_command = 'diff -u'
-$full_hash = false
+$diff_glob = nil
+$diff_command = 'git diff -u --no-index --'
 $verbose = false
 
 # Parse command-line options.
 options = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options] <left-dir> <right-dir>"
+  opts.on('-c', '--compare GLOB', "Show diffs between files which match the given glob") {|glob| $diff_glob = glob }
   opts.on('-d', '--diff CMD', "Set the command to use to diff files (default: '#{$diff_command}')") {|cmd| $diff_command = cmd }
-  opts.on('-f', '--full-hash', "Show the full SHA digest of files") { $full_hash = true }
   opts.on('-v', '--verbose', "Show more output") { $verbose = true }
   opts.on('-h', '--help', "Print these options") { puts opts; exit }
 end
@@ -47,12 +47,6 @@ def colorize(text, *colors)
   [sgr % codes.join(';'), text, sgr % none].join
 end
 
-# Helper method to abort the script.
-def fail(msg, code=1)
-  STDERR.puts msg
-  exit code
-end
-
 
 ##### FILE COMPARISON #####
 
@@ -80,77 +74,87 @@ end
 
 # Returns a sequence of pairs of file paths to compare by taking the union of
 # the entries in the two directories `l` and `r`.
-def child_pairs(l, r)
-  (dir_children(l) + dir_children(r)).uniq.sort.map {|p| [File.join(l, p), File.join(r, p)] }
+def child_paths(prefix, l, r)
+  children = (dir_children(l) + dir_children(r)).uniq.sort
+  if prefix
+    children.map {|x| File.join(prefix, x) }
+  else
+    children
+  end
 end
 
 # Render a tree node as text.
-def render_node(prefix, type, path, hash=nil)
-  spacer = ' ' * ($full_hash ? 40 : 7)
-  rel_path = path.slice((prefix.length + 1)..path.length)
+def render_node(path, type)
   case type
   when :absent
     nil
   when :file
-    hash ||= file_hash(path)
-    hash = hash.slice(0..6) unless $full_hash
-    "#{hash} #{rel_path}"
+    path
   when :directory
-    "#{spacer} #{rel_path}/"
+    "#{path}/"
   else
-    "#{spacer} #{rel_path} (#{type})"
+    "#{path} (#{type})"
   end
 end
 
 # Recursively compares the two directory trees, printing out any differences
 # discovered. Returns true if the two trees match, otherwise returns false.
-def compare_tree(lroot, rroot, l, r)
-  lt = file_type(l)
-  rt = file_type(r)
-  if lt == :absent && rt == :absent
+def compare_tree(left, right, path)
+  lpath = File.join(left, path)
+  rpath = File.join(right, path)
+
+  ltype = file_type(lpath)
+  rtype = file_type(rpath)
+
+  if ltype == :absent && rtype == :absent
     # neither file exists
-    puts colorize("???? #{l} <> #{r} both absent", :magenta)
+    puts colorize("??????? #{path} absent on both sides", :magenta)
     true
-  elsif rt == :absent
+  elsif rtype == :absent
     # file only on left side
-    puts colorize("- #{render_node(lroot, lt, l)}", :red)
+    puts colorize("- #{render_node(path, ltype)}", :red)
     false
-  elsif lt == :absent
+  elsif ltype == :absent
     # file only on right side
-    puts colorize("+ #{render_node(rroot, rt, r)}", :green)
+    puts colorize("+ #{render_node(path, rtype)}", :green)
     false
-  elsif lt != rt
+  elsif ltype != rtype
     # file types don't match
-    puts colorize("- #{render_node(lroot, lt, l)}", :red)
-    puts colorize("+ #{render_node(rroot, rt, r)}", :green)
+    puts colorize("- #{render_node(path, ltype)}", :red)
+    puts colorize("+ #{render_node(path, rtype)}", :green)
     false
-  elsif lt == :file
+  elsif ltype == :file
     # both files
-    lh = file_hash(l)
-    rh = file_hash(r)
-    if lh == rh
-      puts colorize("  #{render_node(lroot, lt, l, lh)}", :cyan) if $verbose
+    lhash = file_hash(lpath)
+    rhash = file_hash(rpath)
+    if lhash == rhash
+      puts colorize("  #{render_node(path, ltype)}", :cyan) if $verbose
       true
     else
-      puts colorize("- #{render_node(lroot, lt, l, lh)}", :red)
-      puts colorize("+ #{render_node(rroot, rt, r, rh)}", :green)
-      puts `#{$diff_command} #{l} #{r}`
+      puts colorize("~ #{path}", :yellow)
+      puts `#{$diff_command} #{lpath} #{rpath}` if $diff_glob && File.fnmatch($diff_glob, path)
       false
     end
-  elsif lt == :directory
+  elsif ltype == :directory
     # both directories
-    child_pairs(l, r).map do |pair|
-      compare_tree(lroot, rroot, pair[0], pair[1])
+    child_paths(path, lpath, rpath).map do |child|
+      compare_tree(left, right, child)
     end.all?
   else
     # don't know how to compare
-    puts colorize("Don't know how to compare #{l} to #{r} (#{lt})", :magenta)
+    puts colorize("Don't know how to compare #{path} (#{ltype})", :magenta)
     false
   end
 end
 
 
 ##### SCRIPT EXECUTOIN #####
+
+# Helper method to abort the script.
+def fail(msg, code=1)
+  STDERR.puts msg
+  exit code
+end
 
 # Check number of arguments.
 if ARGV.count < 2
@@ -163,7 +167,13 @@ end
 left = ARGV[0]
 right = ARGV[1]
 
+unless File.directory?(left) && File.directory?(right)
+  fail "Left and right comparison origins must be directories"
+end
+
 # Run comparison.
 puts "Comparing #{left} <=> #{right}"
-match = compare_tree(left, right, left, right)
+match = child_paths(nil, left, right).map do |child|
+  compare_tree(left, right, child)
+end.all?
 exit match ? 0 : 1
