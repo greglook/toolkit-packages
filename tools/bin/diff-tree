@@ -9,7 +9,7 @@ require 'optparse'
 require 'digest/sha1'
 
 $diff_glob = nil
-$diff_command = 'git diff -u --no-index --'
+$diff_command = 'git diff -u --histogram --color --no-index --'
 $verbose = false
 
 # Parse command-line options.
@@ -132,7 +132,10 @@ def compare_tree(left, right, path)
       true
     else
       puts colorize("~ #{path}", :yellow)
-      puts `#{$diff_command} #{lpath} #{rpath}` if $diff_glob && File.fnmatch($diff_glob, path)
+      if $diff_glob && File.fnmatch($diff_glob, path)
+        puts `#{$diff_command} #{lpath} #{rpath}`
+        puts colorize('~', :yellow)
+      end
       false
     end
   elsif ltype == :directory
