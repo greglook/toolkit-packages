@@ -29,6 +29,7 @@ Plugin 'kchmck/vim-coffee-script'
 Plugin 'cespare/vim-toml'
 Plugin 'docker/docker', {'rtp': '/contrib/syntax/vim/'}
 Plugin 'solarnz/thrift.vim'
+Plugin 'b4b4r07/vim-hcl'
 
 
 call vundle#end()
