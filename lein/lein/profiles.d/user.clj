@@ -20,7 +20,9 @@
   [michaelblume/lein-marginalia "0.9.0"]
   [lein-cloverage "1.0.9"]
   [michaelblume/lein-marginalia "0.9.0"
-   :exclusions [org.clojure/clojurescript]]]
+   :exclusions [org.clojure/clojurescript]]
+  [venantius/yagni "0.1.4"]
+  [walmartlabs/vizdeps "0.1.3"]]
 
  :dependencies
  [[pjstadig/humane-test-output "0.8.0"]]
@@ -33,7 +35,8 @@
  {:width 150
   :map-delimiter ","
   :color-scheme {:nil [:blue]}
-  :tag-types {java.lang.Class {'class #(symbol (.getName %))}}}
+  :tag-types {java.lang.Class {'class #(symbol (.getName %))}
+              java.time.Instant {'inst str}}}
 
  :hiera
  ^:displace
