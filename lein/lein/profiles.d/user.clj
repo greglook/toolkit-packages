@@ -17,7 +17,6 @@
   [lein-hiera "0.9.5"]
   [lein-kibit "0.1.3"]
   [lein-vanity "0.2.0"]
-  [michaelblume/lein-marginalia "0.9.0"]
   [lein-cloverage "1.0.9"]
   [michaelblume/lein-marginalia "0.9.0"
    :exclusions [org.clojure/clojurescript]]
@@ -34,7 +33,7 @@
  {:width 150
   :map-delimiter ","
   :color-scheme {:nil [:blue]}
-  :tag-types {java.lang.Class {'class #(symbol (.getName %))}}}
+  :tag-types {java.lang.Class {'java/class #(symbol (.getName %))}}}
 
  :hiera
  ^:displace
