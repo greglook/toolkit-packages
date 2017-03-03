@@ -20,7 +20,8 @@
   [lein-cloverage "1.0.9"]
   [michaelblume/lein-marginalia "0.9.0"
    :exclusions [org.clojure/clojurescript]]
-  [venantius/yagni "0.1.4"]]
+  [venantius/yagni "0.1.4"]
+  [walmartlabs/vizdeps "0.1.3"]]
 
  :dependencies
  [[pjstadig/humane-test-output "0.8.0"]]
