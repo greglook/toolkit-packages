@@ -34,7 +34,8 @@
  {:width 150
   :map-delimiter ","
   :color-scheme {:nil [:blue]}
-  :tag-types {java.lang.Class {'java/class #(symbol (.getName %))}}}
+  :tag-types {java.lang.Class {'jvm/class #(symbol (.getName %))}
+              java.time.Instant {'inst str}}}
 
  :hiera
  ^:displace
