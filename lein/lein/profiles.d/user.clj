@@ -1,6 +1,5 @@
 {:aliases
- {"doc-lit" ^:displace ["marg" "--dir" "doc/marginalia"]
-  "docs" ^:displace ["do" ["codox"] ["doc-lit"] ["hiera"]]
+ {"doc-lit" ^:displace ["marg" "--dir" "target/doc/marginalia"]
   "coverage" ^:displace ["cloverage"]
   "tests" ["with-profile" "+repl-tools" "do" ["check"] ["test"] ["coverage"]]
   "slamhound" ["with-profile" "+repl-tools" "run" "-m" "slam.hound"]
@@ -8,23 +7,23 @@
 
  :plugins
  [[org.clojure/clojure "1.8.0"]
-  [com.jakemccrary/lein-test-refresh "0.18.1"]
-  [mvxcvi/whidbey "1.3.1"]
-  [lein-ancient "0.6.10"]
-  [lein-cljfmt "0.5.6"]
-  [lein-codox "0.10.2"]
-  [lein-cprint "1.2.0"]
-  [lein-hiera "0.9.5"]
-  [lein-kibit "0.1.3"]
+  [com.jakemccrary/lein-test-refresh "0.21.1"]
+  [mvxcvi/whidbey "1.3.2"]
+  [lein-ancient "0.6.14"]
+  [lein-cljfmt "0.5.7"]
+  [lein-codox "0.10.3"]
+  [lein-cprint "1.3.0"]
+  [lein-hiera "1.0.0"]
+  [lein-kibit "0.1.5"]
   [lein-vanity "0.2.0"]
-  [lein-cloverage "1.0.9"]
+  [lein-cloverage "1.0.10"]
   [michaelblume/lein-marginalia "0.9.0"
    :exclusions [org.clojure/clojurescript]]
   [venantius/yagni "0.1.4"]
-  [walmartlabs/vizdeps "0.1.3"]]
+  [walmartlabs/vizdeps "0.1.6"]]
 
  :dependencies
- [[pjstadig/humane-test-output "0.8.0"]]
+ [[pjstadig/humane-test-output "0.8.3"]]
 
  :injections
  [(require 'pjstadig.humane-test-output)
