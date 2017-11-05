@@ -1,9 +1,6 @@
 {:aliases
  {"doc-lit" ^:displace ["marg" "--dir" "target/doc/marginalia"]
-  "coverage" ^:displace ["cloverage"]
-  "tests" ["with-profile" "+repl-tools" "do" ["check"] ["test"] ["coverage"]]
-  "slamhound" ["with-profile" "+repl-tools" "run" "-m" "slam.hound"]
-  "repl-" ["with-profile" "+repl-tools" "repl"]}
+  "coverage" ^:displace ["cloverage"]}
 
  :plugins
  [[org.clojure/clojure "1.8.0"]
@@ -23,10 +20,15 @@
   [walmartlabs/vizdeps "0.1.6"]]
 
  :dependencies
- [[pjstadig/humane-test-output "0.8.3"]]
+ [[clj-stacktrace "0.2.8"]
+  [org.clojure/tools.namespace "0.2.11"]
+  [pjstadig/humane-test-output "0.8.3"]]
 
  :injections
- [(require 'pjstadig.humane-test-output)
+ [(let [pct-var (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
+        pst-var (ns-resolve (doto 'clj-stacktrace.repl require) 'pst+)]
+    (alter-var-root pct-var (constantly (deref pst-var))))
+  (require 'pjstadig.humane-test-output)
   (pjstadig.humane-test-output/activate!)]
 
  :whidbey
