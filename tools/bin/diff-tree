@@ -10,6 +10,7 @@ require 'digest/sha1'
 
 $diff_glob = nil
 $diff_command = 'git diff -u --histogram --color --no-index --'
+$word_diff_command = 'git diff -u --histogram --word-diff --color --no-index --'
 $verbose = false
 
 # Parse command-line options.
@@ -17,6 +18,7 @@ options = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options] <left-dir> <right-dir>"
   opts.on('-c', '--compare GLOB', "Show diffs between files which match the given glob") {|glob| $diff_glob = glob }
   opts.on('-d', '--diff CMD', "Set the command to use to diff files (default: '#{$diff_command}')") {|cmd| $diff_command = cmd }
+  opts.on('-w', '--word-diff', "Use the default word-diff command (default: '#{$word_diff_command}')") { $diff_command = $word_diff_command }
   opts.on('-v', '--verbose', "Show more output") { $verbose = true }
   opts.on('-h', '--help', "Print these options") { puts opts; exit }
 end
