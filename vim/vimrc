@@ -128,8 +128,9 @@ vnoremap <leader>r :Reverse<cr>
 " find diff merge lines
 nnoremap <leader>m /[<=>]\{7}<cr>
 
-" insert disapproval
+" insert memes
 nnoremap <leader>d A ಠ_ಠ<esc>
+nnoremap <leader>tf A (╯°□°）╯︵ ┻━┻ <esc>
 
 " use tab to jump to matching enclosure pairs
 nnoremap <tab> %
