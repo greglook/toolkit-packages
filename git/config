@@ -38,4 +38,4 @@
     default = simple
 
 [diff]
-    patience = true
+    algorithm = patience
