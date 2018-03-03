@@ -3,11 +3,13 @@
   "coverage" ^:displace ["cloverage"]}
 
  :plugins
- [[org.clojure/clojure "1.8.0"]
-  [com.jakemccrary/lein-test-refresh "0.21.1"]
+ [[org.clojure/clojure "1.9.0"]
+  [org.clojure/tools.namespace "0.3.0-alpha4"]
+  [org.clojure/tools.reader "1.0.2"]
+  [com.jakemccrary/lein-test-refresh "0.22.0"]
   [mvxcvi/whidbey "1.3.2"]
-  [mvxcvi/lein-cljfmt "0.7.0-SNAPSHOT"] ;[rewrite-cljs "0.4.3"]
-  [lein-ancient "0.6.14"]
+  [lein-ancient "0.6.15"]
+  [mvxcvi/lein-cljfmt "0.7.0-SNAPSHOT"]
   [lein-codox "0.10.3"]
   [lein-cprint "1.3.0"]
   [lein-hiera "1.0.0"]
@@ -15,8 +17,7 @@
   [lein-vanity "0.2.0"]
   [lein-cloverage "1.0.10"]
   [lein-eftest "0.4.1"]
-  [michaelblume/lein-marginalia "0.9.0"
-   :exclusions [org.clojure/clojurescript]]
+  [lein-marginalia "0.9.1"]
   [venantius/yagni "0.1.4"]
   [walmartlabs/vizdeps "0.1.6"]
 
