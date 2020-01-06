@@ -125,8 +125,6 @@ alias ll='ls -lh'
 alias la='ls -lhA'
 alias bc='bc -lq'
 alias tmux='tmux -2'
-alias gd='git diff'
-alias gs='git status'
 
 
 
