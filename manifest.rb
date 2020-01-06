@@ -5,10 +5,9 @@ package 'tools',    :default => true
 package 'keychain', :dotfiles => ['zsh']
 
 # shell configuration
-package 'input',     :default => true,              :dotfiles => true
-package 'bash',      :when => shell?('bash'),       :dotfiles => true
-package 'zsh',       :when => shell?('zsh'),        :dotfiles => true
-package 'solarized', :dotfiles => ['vim', 'zsh']
+package 'input', :default => true,        :dotfiles => true
+package 'bash',  :when => shell?('bash'), :dotfiles => true
+package 'zsh',   :when => shell?('zsh'),  :dotfiles => true
 
 # application settings
 package 'git',     :when => installed?('git'),  :into => '.config/git'
