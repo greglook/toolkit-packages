@@ -20,5 +20,4 @@ package 'lein',  :when => installed?('lein'),           :dotfiles => true
 package 'rbenv', :when => file?(ENV['HOME'], '.rbenv'), :dotfiles => true
 
 # misc packages
-package 'gtd',    :dotfiles => ['vim']
-package 'ubuntu', :into => 'admin/ubuntu'
+package 'gtd', :dotfiles => ['vim']
