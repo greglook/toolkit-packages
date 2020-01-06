@@ -14,7 +14,6 @@ package 'git',     :when => installed?('git'),  :into => '.config/git'
 package 'tmux',    :when => installed?('tmux'), :dotfiles => ['tmux.conf', 'zsh']
 package 'vim',     :when => installed?('vim'),  :dotfiles => true
 package 'vundle',  :into => '.vim'
-package 'synergy', :into => 'util/synergy'
 
 # programming languages
 package 'lein',  :when => installed?('lein'),           :dotfiles => true
