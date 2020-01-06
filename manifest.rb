@@ -8,7 +8,6 @@ package 'keychain', :dotfiles => ['zsh']
 package 'input',     :default => true,              :dotfiles => true
 package 'bash',      :when => shell?('bash'),       :dotfiles => true
 package 'zsh',       :when => shell?('zsh'),        :dotfiles => true
-package 'cygwin',    :when => file?('/Cygwin.bat'), :dotfiles => true
 package 'solarized', :dotfiles => ['vim', 'zsh']
 
 # application settings
