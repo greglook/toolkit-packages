@@ -13,3 +13,8 @@ set mark-symlinked-directories on
 
 # don't match .svn, etc with tab-completion
 set match-hidden-files off
+
+set completion-ignore-case on
+set completion-prefix-display-length 5
+set show-all-if-ambiguous on
+set show-all-if-unmodified on
