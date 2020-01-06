@@ -21,7 +21,7 @@ Plugin 'scrooloose/nerdtree'
 " Clojure
 Plugin 'guns/vim-clojure-static'
 Plugin 'raymond-w-ko/vim-niji'
-Plugin 'paredit.vim'
+Plugin 'kovisoft/paredit'
 
 " Other syntax
 Plugin 'ledger/vim-ledger'

@@ -10,10 +10,9 @@ package 'bash',  :when => shell?('bash'), :dotfiles => true
 package 'zsh',   :when => shell?('zsh'),  :dotfiles => true
 
 # application settings
-package 'git',     :when => installed?('git'),  :into => '.config/git'
-package 'tmux',    :when => installed?('tmux'), :dotfiles => ['tmux.conf', 'zsh']
-package 'vim',     :when => installed?('vim'),  :dotfiles => true
-package 'vundle',  :into => '.vim'
+package 'git',  :when => installed?('git'),  :into => '.config/git'
+package 'tmux', :when => installed?('tmux'), :dotfiles => ['tmux.conf', 'zsh']
+package 'vim',  :when => installed?('vim'),  :dotfiles => true
 
 # programming languages
 package 'lein',  :when => installed?('lein'),           :dotfiles => true
