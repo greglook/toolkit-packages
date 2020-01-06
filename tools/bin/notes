@@ -1,5 +1,0 @@
-#!/bin/sh
-
-loc=${@:-.}
-
-find $loc -type d \( -name .svn -o -name .git \) -prune -o -type f -print0 | sort -z | xargs -0 grep -H -I -n --color=auto -P '(TODO|DEBUG|FIXME|REVIEW|XXX)'
