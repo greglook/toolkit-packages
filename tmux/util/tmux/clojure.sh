@@ -45,11 +45,11 @@ cd $PROJECT_ROOT
 # Initialize workspace
 tmux -2 new-session -d -s $SESSION #-c "$PROJECT_ROOT"
 
-tmux new-window -t "$SESSION:0" -n 'misc' -c "$HOME" -k
+tmux new-window -t "$SESSION:0" -n 'notes' -c "$HOME" -k
 
-tmux new-window -t "$SESSION:1" -n 'build' -c "$PROJECT_ROOT"
+tmux new-window -t "$SESSION:1" -n 'git' -c "$PROJECT_ROOT"
 
-tmux new-window -t "$SESSION:2" -n 'repl' -c "$PROJECT_ROOT"
+tmux new-window -t "$SESSION:2" -n 'run' -c "$PROJECT_ROOT"
 #tmux send-keys -t "$SESSION:2" "lein repl" C-m
 
 tmux new-window -t "$SESSION:3" -n 'src' -c "$(seek_into "$PROJECT_ROOT/src")"
@@ -58,10 +58,8 @@ tmux new-window -t "$SESSION:4" -n 'test' -c "$(seek_into "$PROJECT_ROOT/test")"
 tmux split-window -t "$SESSION:4" -h -c "$PROJECT_ROOT"
 #tmux send-keys -t "$SESSION:4.1" "lein test-refresh" C-m
 
-tmux new-window -t "$SESSION:5" -n 'doc'  -c "$PROJECT_ROOT/doc"
-
 # Attach to session
-tmux select-window -t "$SESSION:3"
+tmux select-window -t "$SESSION:2"
 tmux select-window -t "$SESSION:1"
 
 exec tmux attach -t "$SESSION"
