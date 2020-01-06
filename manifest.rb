@@ -17,6 +17,3 @@ package 'vim',  :when => installed?('vim'),  :dotfiles => true
 # programming languages
 package 'lein',  :when => installed?('lein'),           :dotfiles => true
 package 'rbenv', :when => file?(ENV['HOME'], '.rbenv'), :dotfiles => true
-
-# misc packages
-package 'gtd', :dotfiles => ['vim']
