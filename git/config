@@ -1,7 +1,7 @@
 [user]
     name = Greg Look
-    email = greg@greg-look.net
-    signingkey = DE013B39
+    email = greg@mvxcvi.com
+    signingkey = "327D725B7F3AA97264F3643A2C2FDC653E12F5F0"
 
 [core]
     pager = less
@@ -33,6 +33,9 @@
     diff = auto
     interactive = auto
     status = auto
+
+[fetch]
+    prune = true
 
 [push]
     default = simple
