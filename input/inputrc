@@ -18,3 +18,7 @@ set completion-ignore-case on
 set completion-prefix-display-length 5
 set show-all-if-ambiguous on
 set show-all-if-unmodified on
+
+# enable Alt-arrows
+"\e[1;3D": backward-word
+"\e[1;3C": forward-word
