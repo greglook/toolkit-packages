@@ -15,7 +15,7 @@
   ;[lein-marginalia "0.9.1"]
   [lein-shell "0.5.0"]
   [com.jakemccrary/lein-test-refresh "0.24.1"]
-  ;[venantius/yagni "0.1.7" :exclusions [org.clojure/tools.logging]]
+  [venantius/yagni "0.1.7" :exclusions [org.clojure/tools.logging]]
   ,,,]
 
  :dependencies
