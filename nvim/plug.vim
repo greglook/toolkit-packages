@@ -12,7 +12,7 @@
 call plug#begin(stdpath('data') . '/plugs')
 
 " General
-Plug 'tpope/vim-surround'
+Plug 'machakann/vim-sandwich'
 Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle'}
 
 " Clojure
@@ -29,8 +29,7 @@ Plug 'b4b4r07/vim-hcl', {'for': 'hcl'}
 
 call plug#end()
 
-filetype plugin on
-filetype indent on
+filetype plugin indent on
 
 " Shortcuts
 map <C-n> :NERDTreeToggle<CR>
