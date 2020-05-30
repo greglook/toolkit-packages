@@ -39,6 +39,18 @@
   :color-scheme {:nil [:blue]}
   :tag-types {java.lang.Class {'jvm/class #(symbol (.getName %))}
               java.time.Instant {'inst str}
+              java.time.Duration {'time/duration str}
+              java.time.LocalDate {'time/local-date str}
+              java.time.LocalDateTime {'time/local-date-time str}
+              java.time.LocalTime {'time/local-time str}
+              java.time.Month {'time/month str}
+              java.time.Period {'time/period str}
+              java.time.Year {'time/year str}
+              java.time.YearMonth {'time/year-month str}
+              java.time.ZoneId {'time/zone-id str}
+              java.time.ZoneRegion {'time/zone-region str}
+              java.time.ZoneOffset {'time/zone-offset str}
+              java.time.ZonedDateTime {'time/zoned-date-time str}
               'org.joda.time.DateTime {'joda/inst str}
               'org.joda.time.UTCDateTimeZone {'joda/zone str}}}
 
