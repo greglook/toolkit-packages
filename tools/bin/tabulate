@@ -15,7 +15,7 @@
 #   capture application and environment names from a BSF message dump and
 #   print with a custom format
 #
-# Author:: Greg Look (greglook@amazon.com)
+# Author:: Greg Look (greg@mvxcvi.com)
 
 require 'optparse'
 

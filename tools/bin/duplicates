@@ -1,9 +1,206 @@
-#!/bin/sh
+#!/usr/bin/env ruby
 
-find "$@" -path '**/.git' -prune -or -type f -not -empty -printf "%s\n" \
-    | sort -rn \
-    | uniq -d \
-    | xargs -I{} -n1 find -type f -size {}c -print0 \
-    | xargs -0 md5sum \
-    | sort \
-    | uniq -w32 --all-repeated=separate
+require 'digest/sha1'
+require 'optparse'
+require 'set'
+
+
+# Global options.
+$data_path = nil
+$roots = []
+$mode = :files
+$verbose = false
+
+# Parse command-line options.
+options = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options] [path ...]"
+  opts.on('-f', '--file PATH', "File to cache file data in") {|path| $data_path = path }
+  opts.on('-d', '--dirs', "Show aggregated directories instead of individual files") { $mode = :dirs }
+  opts.on('-v', '--verbose', "Show extra information") { $verbose = true }
+  opts.on('-h', '--help', "Display usage information") { print opts; exit }
+end
+options.parse!
+
+# Take remaining arguments as directory roots.
+$roots.concat(ARGV)
+$roots << '.' if $roots.empty?
+
+def dirname(path)
+  path.sub(/\/[^\/]*$/, '')
+end
+
+def ignored?(path)
+  path.include?('/.git') || path.include?('/.svn')
+end
+
+# Load file cache if available.
+prev_info = {}
+if $data_path && File.file?($data_path)
+  STDERR.puts "Loading previous file data from #{$data_path} ..."
+  File.open($data_path).each_line.drop(1).each do |line|
+    path, size, digest = *line.chomp.split("\t")
+    info = {size: size.to_i}
+    info[:digest] = digest if digest
+    prev_info[path] = info
+  end
+end
+
+file_info = {}
+size_paths = {}
+hash_paths = {}
+dir_files = {}
+
+# Scan files to determine presence and sizes.
+STDERR.puts "Scanning files..."
+$roots.each do |root|
+  Dir.glob("#{root}/**/*", File::FNM_DOTMATCH) do |path|
+    next if ignored?(path)
+    next unless File.file?(path)
+    file = File.new(path)
+    next if file.size.zero?
+    info = {path: path, size: file.size}
+    file_info[path] = info
+    size_paths[file.size] ||= []
+    size_paths[file.size] << path
+
+    dir_path = dirname(path)
+    dir_files[dir_path] ||= []
+    dir_files[dir_path] << info
+  end
+end
+STDERR.puts "Found #{file_info.size} files with #{size_paths.size} distinct sizes."
+
+# Hash files with matching sizes to find dupes.
+sha1 = Digest::SHA1.new
+size_paths.each do |size, paths|
+  paths = size_paths[size]
+  next if paths.size <= 1
+  #puts "Comparing #{paths.size} files with matching size #{size}..."
+  paths.each do |path|
+    # Try to find cached hash.
+    prev = prev_info[path]
+    if prev && prev[:digest] && prev[:size] == size
+      digest = prev[:digest]
+    else
+      sha1.file(path)
+      digest = sha1.hexdigest!
+    end
+    hash_paths[digest] ||= []
+    hash_paths[digest] << path
+    file_info[path][:digest] = digest
+  end
+end
+
+# Write out updated data file.
+if $data_path
+  STDERR.puts("Writing #{file_info.size} rows of file info to #{$data_path}")
+  File.open($data_path, 'w') do |data|
+    data.puts("path\tsize\tdigest")
+    file_info.each do |path, file|
+      data.puts([path, file[:size], file[:digest] || ''].join("\t"))
+    end
+  end
+end
+
+# Switch action on mode.
+if $mode == :files
+  dupe_count = 0
+  hash_paths.each do |digest, duplicates|
+    next if duplicates.size <= 1
+    example = file_info[duplicates[0]]
+    puts "#{duplicates.size} duplicate files of size #{example[:size]} share hash #{digest}"
+    duplicates.each do |path|
+      puts "    #{path}"
+    end
+    dupe_count += 1
+  end
+  if dupe_count.positive?
+    STDERR.puts "Found #{dupe_count} groups of duplicate files"
+    exit 2
+  end
+
+elsif $mode == :dirs
+  # Determine candidate directories.
+  candidates = {}
+  STDERR.puts "Finding directory pairs with duplicates..."
+  hash_paths.each do |digest, paths|
+    next unless paths.size > 1
+    #puts "Looking at digest #{digest} with #{paths.count} paths: #{paths.take(3).inspect}"
+    paths.size.times do |i|
+      left_path = paths[i]
+      #next if ignored?(left_path)
+      #next if file_info[left_path][:size].zero?
+      left_dir = dirname(left_path)
+      ((i+1)...paths.size).each do |j|
+        right_path = paths[j]
+        #next if ignored?(right_path)
+        right_dir = dirname(right_path)
+        unless left_dir == right_dir
+          a, b = *([left_dir, right_dir].sort)
+          unless candidates[a] && candidates[a][b]
+            #puts "Adding candidate pair #{a} <=> #{b}"
+            candidates[a] ||= {}
+            candidates[a][b] = true
+          end
+        end
+      end
+    end
+  end
+
+  # Consider candidate pairs.
+  dupes = []
+  candidates.keys.sort.each do |left_dir|
+    candidates[left_dir].keys.sort.each do |right_dir|
+      left_files = dir_files[left_dir]
+      right_files = dir_files[right_dir]
+
+      left_size = left_files.map{|f| f[:size] }.reduce(&:+)
+      right_size = right_files.map{|f| f[:size] }.reduce(&:+)
+      #puts "Considering #{left_dir} (#{left_files.size} files) <=> #{right_dir} (#{right_files.size} files)"
+
+      # If both directories have some files with no digest, there are unique
+      # files on both sides.
+      left_unique = left_files.find {|f| f[:digest].nil? }
+      right_unique = right_files.find {|f| f[:digest].nil? }
+      next if left_unique && right_unique
+
+      # Compare sets of unique digests between directories.
+      left_digests = Set.new(left_files.map{|f| f[:digest] }.reject(&:nil?))
+      right_digests = Set.new(right_files.map{|f| f[:digest] }.reject(&:nil?))
+      if !left_unique && !right_unique && left_digests == right_digests
+        # if every file in A and B have digests and the set of digests is the same, then A=B
+        # TODO: try upwards?
+        dupes << [
+          left_size,
+          left_files.size,
+          "%d (%.1f MB) files in %s are identical to files in %s" % [left_files.size, left_size/(1024.0*1024.0), left_dir, right_dir]
+        ]
+      elsif !left_unique && left_digests < right_digests
+        # if every file in A has a digest which is present in some file in B, then A<B
+        dupes << [
+          left_size,
+          left_files.size,
+          "%d (%.1f MB) files in %s are a subset of files in %s" % [left_files.size, left_size/(1024.0*1024.0), left_dir, right_dir]
+        ]
+      elsif !right_unique && left_digests > right_digests
+        # if every file in B has a digest which is present in some file in A, then A>B
+        dupes << [
+          right_size,
+          right_files.size,
+          "%d (%.1f MB) files in %s are a subset of files in %s" % [right_files.size, right_size/(1024.0*1024.0), right_dir, left_dir]
+        ]
+      end
+    end
+  end
+
+  # TODO: Output results
+  #dupes.sort.reverse.each do |entry|
+  dupes.each do |entry|
+    size, count, msg = *entry
+    puts msg
+  end
+
+else
+  STDERR.puts("Unknown mode #{$mode}")
+  exit 4
+end
