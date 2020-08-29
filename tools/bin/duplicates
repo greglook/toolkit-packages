@@ -16,6 +16,7 @@ options = OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options] [path ...]"
   opts.on('-f', '--file PATH', "File to cache file data in") {|path| $data_path = path }
   opts.on('-d', '--dirs', "Show aggregated directories instead of individual files") { $mode = :dirs }
+  opts.on('-c', '--clean', "Interactively clean files by picking ones to keep") { $mode = :clean }
   opts.on('-v', '--verbose', "Show extra information") { $verbose = true }
   opts.on('-h', '--help', "Display usage information") { print opts; exit }
 end
@@ -58,7 +59,11 @@ $roots.each do |root|
     next unless File.file?(path)
     file = File.new(path)
     next if file.size.zero?
-    info = {path: path, size: file.size}
+    info = {
+      path: path,
+      size: file.size,
+      mtime: file.mtime,
+    }
     file_info[path] = info
     size_paths[file.size] ||= []
     size_paths[file.size] << path
@@ -68,7 +73,7 @@ $roots.each do |root|
     dir_files[dir_path] << info
   end
 end
-STDERR.puts "Found #{file_info.size} files with #{size_paths.size} distinct sizes."
+puts "Found #{file_info.size} files with #{size_paths.size} distinct sizes."
 
 # Hash files with matching sizes to find dupes.
 sha1 = Digest::SHA1.new
@@ -109,13 +114,15 @@ if $mode == :files
     next if duplicates.size <= 1
     example = file_info[duplicates[0]]
     puts "#{duplicates.size} duplicate files of size #{example[:size]} share hash #{digest}"
-    duplicates.each do |path|
-      puts "    #{path}"
+    duplicates.sort.each do |path|
+      info = file_info[path]
+      path = path[2..-1] if path.start_with?('./')
+      puts "    [#{info[:mtime]}] #{path}"
     end
     dupe_count += 1
   end
   if dupe_count.positive?
-    STDERR.puts "Found #{dupe_count} groups of duplicate files"
+    puts "Found #{dupe_count} groups of duplicate files"
     exit 2
   end
 
@@ -198,6 +205,47 @@ elsif $mode == :dirs
   dupes.each do |entry|
     size, count, msg = *entry
     puts msg
+  end
+
+elsif $mode == :clean
+  dupe_total = hash_paths.values.reject{|paths| paths.count == 1 }.count
+  dupe_index = 0
+
+  hash_paths.each do |digest, duplicates|
+    next if duplicates.size <= 1
+    dupe_index += 1
+    example = file_info[duplicates[0]]
+    puts
+    puts "Found #{duplicates.size} duplicate files of size #{example[:size]} (#{dupe_index}/#{dupe_total})"
+    choices = duplicates.sort
+    choices.each_with_index do |path, i|
+      info = file_info[path]
+      path = path[2..-1] if path.start_with?('./')
+      puts "  #{i+1}) #{path}"
+    end
+    choice = nil
+    while choice.nil? do
+      print "Select file to keep [1]-#{choices.count}/s/q: "
+      choice = STDIN.gets.chomp
+      break if ["", "s", "q"].include?(choice)
+      break if choice =~ /[0-9]+/ && choices[choice.to_i - 1]
+      puts "Invalid choice: #{choice.inspect}"
+      choice = nil
+    end
+    if choice == "s"
+      puts "Skipping..."
+      next
+    elsif choice == "q"
+      puts "Quitting..."
+      exit 0
+    else
+      chosen = choice == "" ? 0 : choice.to_i - 1
+      choices.each_with_index do |path, i|
+        next if chosen == i
+        puts "    rm #{path}"
+        File.delete(path)
+      end
+    end
   end
 
 else
