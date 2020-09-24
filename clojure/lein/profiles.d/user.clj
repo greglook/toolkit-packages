@@ -6,11 +6,11 @@
   [mvxcvi/whidbey "2.2.1"]
   [lein-ancient "0.6.15"]
   [lein-codox "0.10.7"]
-  [lein-cprint "1.3.2"]
+  [lein-cprint "1.3.3"]
   [lein-hiera "1.1.0"]
   ;[lein-nvd "1.1.1" :exclusions [org.slf4j/slf4j-api org.slf4j/jcl-over-slf4j]]
   [lein-vanity "0.2.0"]
-  [lein-cloverage "1.1.2"]
+  [lein-cloverage "1.2.1"]
   [lein-collisions "0.1.4"]
   ;[lein-marginalia "0.9.1"]
   [lein-shell "0.5.0"]
@@ -20,7 +20,7 @@
 
  :dependencies
  [[clj-stacktrace "0.2.8"]
-  [pjstadig/humane-test-output "0.9.0"]]
+  [pjstadig/humane-test-output "0.10.0"]]
 
  :injections
  [(let [pct-var (ns-resolve (doto 'clojure.stacktrace require) 'print-cause-trace)
