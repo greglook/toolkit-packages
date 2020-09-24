@@ -109,6 +109,7 @@ nnoremap <leader>m /[<=>]\{7}<cr>
 
 " insert memes
 nnoremap <leader>ed A ಠ_ಠ<esc>
+nnoremap <leader>es A ¯\_(ツ)_/¯<esc>
 nnoremap <leader>etf A (╯°□°）╯︵ ┻━┻ <esc>
 
 " use tab to jump to matching enclosure pairs

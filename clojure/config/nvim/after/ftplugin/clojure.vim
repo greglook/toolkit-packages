@@ -14,3 +14,7 @@ let g:clojure_maxlines = 10000
 
 " Shortcut to fix the current file
 nnoremap <leader>cs :call cljstyle#fix()<cr>
+
+" FIXME: use cljstyle for formatting
+"setlocal equalprg=cljstyle\ pipe
+"nnoremap <leader>cs gg=G''<cr>

@@ -3,7 +3,7 @@
 
  :plugins
  [[org.clojure/clojure "1.10.1"]
-  [mvxcvi/whidbey "2.2.0"]
+  [mvxcvi/whidbey "2.2.1"]
   [lein-ancient "0.6.15"]
   [lein-codox "0.10.7"]
   [lein-cprint "1.3.2"]
@@ -37,7 +37,7 @@
   :map-delimiter ","
   :namespace-maps true
   :color-scheme {:nil [:blue]}
-  :tag-types {java.lang.Class {'jvm/class #(symbol (.getName %))}
+  :tag-types {java.lang.Class {'class #(symbol (.getName %))}
               java.time.Instant {'inst str}
               java.time.Duration {'time/duration str}
               java.time.LocalDate {'time/local-date str}
