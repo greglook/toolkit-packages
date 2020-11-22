@@ -10,6 +10,7 @@ $data_path = nil
 $roots = []
 $mode = :files
 $verbose = false
+$deprioritize = []
 
 # Parse command-line options.
 options = OptionParser.new do |opts|
@@ -17,6 +18,7 @@ options = OptionParser.new do |opts|
   opts.on('-f', '--file PATH', "File to cache file data in") {|path| $data_path = path }
   opts.on('-d', '--dirs', "Show aggregated directories instead of individual files") { $mode = :dirs }
   opts.on('-c', '--clean', "Interactively clean files by picking ones to keep") { $mode = :clean }
+  opts.on(      '--deprioritize PATH', "Deprioritize a path when choosing a default in clean mode") {|path| $deprioritize << path }
   opts.on('-v', '--verbose', "Show extra information") { $verbose = true }
   opts.on('-h', '--help', "Display usage information") { print opts; exit }
 end
@@ -32,6 +34,28 @@ end
 
 def ignored?(path)
   path.include?('/.git') || path.include?('/.svn')
+end
+
+COLORS = [:black, :red, :green, :yellow, :blue, :magenta, :cyan, :white].freeze
+
+# Apply ANSI color codes to the given text.
+def colorize(text, *colors)
+  sgr = "\e[%sm"
+  none = 0
+  bold = 1
+  fg = 30
+
+  codes = colors.map do |k|
+    if k == :bold
+      bold
+    else
+      i = COLORS.index {|c| c == k }
+      raise "No such color: #{k}" unless i
+      fg + i
+    end
+  end
+
+  [sgr % codes.join(';'), text, sgr % none].join
 end
 
 # Load file cache if available.
@@ -114,10 +138,15 @@ if $mode == :files
     next if duplicates.size <= 1
     example = file_info[duplicates[0]]
     puts "#{duplicates.size} duplicate files of size #{example[:size]} share hash #{digest}"
+    show_mtimes = (1 < duplicates.map{|path| file_info[path][:mtime] }.uniq.count)
     duplicates.sort.each do |path|
       info = file_info[path]
       path = path[2..-1] if path.start_with?('./')
-      puts "    [#{info[:mtime]}] #{path}"
+      if show_mtimes
+        puts "    #{path} [#{info[:mtime]}]"
+      else
+        puts "    #{path}"
+      end
     end
     dupe_count += 1
   end
@@ -214,24 +243,47 @@ elsif $mode == :clean
   hash_paths.each do |digest, duplicates|
     next if duplicates.size <= 1
     dupe_index += 1
-    example = file_info[duplicates[0]]
+
+    # Print header
     puts
-    puts "Found #{duplicates.size} duplicate files of size #{example[:size]} (#{dupe_index}/#{dupe_total})"
+    puts "Found #{colorize(duplicates.size, :bold, :cyan)} duplicate files of size #{colorize(file_info[duplicates[0]][:size], :cyan)} (#{colorize(dupe_index, :bold, :yellow)}/#{colorize(dupe_total, :yellow)})"
+
+    # Determine default
     choices = duplicates.sort
+    ranked = []
+    $deprioritize.each do |prefix|
+      choices.each do |path|
+        next if ranked.include? path
+        ranked << path if path.start_with? prefix
+      end
+    end
+    ranked.concat(choices.reject{|path| ranked.include? path }.sort)
+    default = choices.index(ranked.last)
+
+    # Print choices
     choices.each_with_index do |path, i|
       info = file_info[path]
       path = path[2..-1] if path.start_with?('./')
-      puts "  #{i+1}) #{path}"
+      line = "  #{i+1}) #{path}"
+      if i == default
+        puts colorize(line, :bold)
+      else
+        puts line
+      end
     end
+
+    # Ask which file to keep
     choice = nil
     while choice.nil? do
-      print "Select file to keep [1]-#{choices.count}/s/q: "
+      print "Select file to keep 1-#{choices.count}/s/q: "
       choice = STDIN.gets.chomp
       break if ["", "s", "q"].include?(choice)
       break if choice =~ /[0-9]+/ && choices[choice.to_i - 1]
       puts "Invalid choice: #{choice.inspect}"
       choice = nil
     end
+
+    # Enact choice
     if choice == "s"
       puts "Skipping..."
       next
@@ -239,10 +291,10 @@ elsif $mode == :clean
       puts "Quitting..."
       exit 0
     else
-      chosen = choice == "" ? 0 : choice.to_i - 1
+      chosen = choice == "" ? default : choice.to_i - 1
       choices.each_with_index do |path, i|
         next if chosen == i
-        puts "    rm #{path}"
+        #puts "    rm #{path}"
         File.delete(path)
       end
     end
