@@ -9,8 +9,9 @@ require 'set'
 $data_path = nil
 $roots = []
 $mode = :files
+$auto = false
 $verbose = false
-$deprioritize = []
+$prioritize = []
 
 # Parse command-line options.
 options = OptionParser.new do |opts|
@@ -18,7 +19,8 @@ options = OptionParser.new do |opts|
   opts.on('-f', '--file PATH', "File to cache file data in") {|path| $data_path = path }
   opts.on('-d', '--dirs', "Show aggregated directories instead of individual files") { $mode = :dirs }
   opts.on('-c', '--clean', "Interactively clean files by picking ones to keep") { $mode = :clean }
-  opts.on(      '--deprioritize PATH', "Deprioritize a path when choosing a default in clean mode") {|path| $deprioritize << path }
+  opts.on('-a', '--auto', "Automatically clean files with only one prioritized copy") { $auto = true }
+  opts.on('-p', '--prioritize PATH', "Prioritize a path when choosing a default in clean mode") {|path| $prioritize << path }
   opts.on('-v', '--verbose', "Show extra information") { $verbose = true }
   opts.on('-h', '--help', "Display usage information") { print opts; exit }
 end
@@ -250,21 +252,23 @@ elsif $mode == :clean
 
     # Determine default
     choices = duplicates.sort
-    ranked = []
-    $deprioritize.each do |prefix|
+    prioritized = []
+    $prioritize.each do |prefix|
       choices.each do |path|
-        next if ranked.include? path
-        ranked << path if path.start_with? prefix
+        next if prioritized.include? path
+        prioritized << path if path.start_with? prefix
       end
     end
-    ranked.concat(choices.reject{|path| ranked.include? path }.sort)
-    default = choices.index(ranked.last)
+    unprioritized = choices.reject{|path| prioritized.include? path }.sort_by {|path| [file_info[path][:mtime], path] }
+    default = choices.index(prioritized.first || unprioritized.first)
+
+    show_mtimes = (1 < duplicates.map{|path| file_info[path][:mtime] }.uniq.count)
 
     # Print choices
     choices.each_with_index do |path, i|
       info = file_info[path]
       path = path[2..-1] if path.start_with?('./')
-      line = "  #{i+1}) #{path}"
+      line = "  %2d) %s%s" % [i+1, show_mtimes ? "[#{info[:mtime]}] " : "", path]
       if i == default
         puts colorize(line, :bold)
       else
@@ -272,29 +276,51 @@ elsif $mode == :clean
       end
     end
 
-    # Ask which file to keep
-    choice = nil
-    while choice.nil? do
-      print "Select file to keep 1-#{choices.count}/s/q: "
-      choice = STDIN.gets.chomp
-      break if ["", "s", "q"].include?(choice)
-      break if choice =~ /[0-9]+/ && choices[choice.to_i - 1]
-      puts "Invalid choice: #{choice.inspect}"
+    if $auto && prioritized.size == 1
+      # Automatically accept default
+      puts "Automatically selecting #{default + 1}"
+      choice = ""
+      sleep 0.05
+    else
+      # Ask which file to keep
       choice = nil
+      while choice.nil? do
+        print "Select file to keep 1-#{choices.count}/s/q: "
+        answer = STDIN.gets.chomp
+        if ["", "s", "q"].include?(answer)
+          choice = answer
+          break
+        end
+        choice = []
+        answer.strip.split(/\s+/).each do |ch|
+          unless ch =~ /[0-9]+/
+            puts "Invalid non-numeric choice: #{ch.inspect}"
+            choice = nil
+            break
+          end
+          idx = ch.to_i
+          unless choices[idx - 1]
+            puts "Invalid index choice: #{idx}"
+            choice = nil
+            break
+          end
+          choice << idx - 1
+        end
+      end
     end
 
     # Enact choice
     if choice == "s"
-      puts "Skipping..."
+      puts "    Skipping..."
       next
     elsif choice == "q"
-      puts "Quitting..."
+      puts "    Quitting..."
       exit 0
     else
-      chosen = choice == "" ? default : choice.to_i - 1
+      preserved = choice == "" ? [default] : choice
       choices.each_with_index do |path, i|
-        next if chosen == i
-        #puts "    rm #{path}"
+        next if preserved.include?(i)
+        puts "    rm #{path}"
         File.delete(path)
       end
     end
