@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+# Find directories which _only_ contain files ignored by git. This is useful
+# when code is moved or deleted, but some artifacts remain which prevent the
+# directory from being cleaned up.
+
+
+# Return children of the directory which are not ignored by git.
+unignored-children() {
+  local dir="${1%/}"
+  local children="$(find "$dir" -depth 1 \( -type d -exec sh -c 'printf "%s/\n" "$0"' {} \; -or -print \) | sort)"
+
+  # empty directories count as ignored
+  if [[ -z $children ]]; then
+    return
+  fi
+
+  # compare children to the ignored list
+  local ignored="$(git check-ignore --stdin <<< "$children")"
+  if [[ "$children" != "$ignored" ]]; then
+    comm -23 <(echo "$children") - <<< "$ignored"
+  fi
+}
+
+
+# Traverse the given directory looking for empty dirs.
+traverse-dir() {
+  local dir="$1"
+  local children="$(unignored-children "$dir")"
+  if [[ -z "$children" ]]; then
+    echo "${dir#./}"
+  else
+    for child in $children; do
+      child="${child%/}"
+      if [[ -d $child && ! -L $child && $(basename $child) != .git ]]; then
+        traverse-dir "$child"
+      fi
+    done
+  fi
+}
+
+
+# Default to the current directory if no arguments provided.
+if [[ $# -eq 0 ]]; then
+  SEARCH_DIRS="."
+else
+  SEARCH_DIRS="$@"
+fi
+
+# Search directories for fully ignored dirs.
+for dir in "$SEARCH_DIRS"; do
+  traverse-dir "$dir"
+done
