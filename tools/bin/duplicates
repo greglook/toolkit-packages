@@ -12,6 +12,7 @@ $mode = :files
 $auto = false
 $verbose = false
 $prioritize = []
+$skip_hashes = []
 
 # Parse command-line options.
 options = OptionParser.new do |opts|
@@ -21,6 +22,7 @@ options = OptionParser.new do |opts|
   opts.on('-c', '--clean', "Interactively clean files by picking ones to keep") { $mode = :clean }
   opts.on('-a', '--auto', "Automatically clean files with only one prioritized copy") { $auto = true }
   opts.on('-p', '--prioritize PATH', "Prioritize a path when choosing a default in clean mode") {|path| $prioritize << path }
+  opts.on('-s', '--skip HASH', "Automatically skip files with the given hash") {|hash| $skip_hashes << hash }
   opts.on('-v', '--verbose', "Show extra information") { $verbose = true }
   opts.on('-h', '--help', "Display usage information") { print opts; exit }
 end
@@ -246,9 +248,13 @@ elsif $mode == :clean
     next if duplicates.size <= 1
     dupe_index += 1
 
+    file_size = file_info[duplicates[0]][:size]
+    file_hash = file_info[duplicates[0]][:digest]
+
     # Print header
     puts
-    puts "Found #{colorize(duplicates.size, :bold, :cyan)} duplicate files of size #{colorize(file_info[duplicates[0]][:size], :cyan)} (#{colorize(dupe_index, :bold, :yellow)}/#{colorize(dupe_total, :yellow)})"
+    puts "Found group of #{colorize(duplicates.size, :bold, :cyan)} duplicate files (#{colorize(dupe_index, :bold, :yellow)}/#{colorize(dupe_total, :yellow)})"
+    puts "  #{colorize(file_hash, :magenta)} | #{colorize(file_size, :cyan)} bytes"
 
     # Determine default
     choices = duplicates.sort
@@ -280,6 +286,11 @@ elsif $mode == :clean
       # Automatically accept default
       puts "Automatically selecting #{default + 1}"
       choice = ""
+      sleep 0.05
+    elsif $skip_hashes.include?(file_hash)
+      # File hash is listed to skip.
+      puts "Automatically skipping"
+      choice = "s"
       sleep 0.05
     else
       # Ask which file to keep
