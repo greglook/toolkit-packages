@@ -1,8 +1,7 @@
 # Manifest of available toolkit packages.
 
 # scripts and utilities
-package 'tools',    :default => true
-package 'keychain', :dotfiles => ['zsh']
+package 'tools', :default => true
 
 # shell configuration
 package 'input', :default => true,        :dotfiles => true
