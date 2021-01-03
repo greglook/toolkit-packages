@@ -10,12 +10,5 @@
 # load additional configuration
 load_configs "$HOME/.zsh/profile.d"
 
-# prefer executables in ~/bin
-local bin_dir="$HOME/bin"
-[[ -d $bin_dir ]] && path=($bin_dir $path)
-
-# ensure path only contains unique entries
-typeset -U path
-
 # block loading of global RC file
 unsetopt global_rcs

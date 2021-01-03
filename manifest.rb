@@ -1,7 +1,7 @@
 # Manifest of available toolkit packages.
 
 # scripts and utilities
-package 'tools', :default => true
+package 'tools', :default => true, :dotfiles => ['local']
 
 # shell configuration
 package 'input', :default => true,        :dotfiles => true

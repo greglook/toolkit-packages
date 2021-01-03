@@ -23,6 +23,16 @@ export SAVEHIST=1000
 
 
 
+##### PATH SETTINGS #####
+
+# local user path dirs
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
+
+# ensure path only contains unique entries
+typeset -U path
+
+
+
 ##### UTILITY FUNCTIONS #####
 
 # sources all regular files in the given directory, if it exists.
