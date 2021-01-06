@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#
+# Read the SSL/TLS certificate from a server.
+
+server=$1
+port=${2:-443}
+host=${3:-$server}
+
+echo \
+    | openssl s_client -showcerts -servername $server -connect "${host}:${port}" 2>/dev/null \
+    | openssl x509 -inform pem -noout -text

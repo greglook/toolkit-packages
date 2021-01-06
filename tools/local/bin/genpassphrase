@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+#
+# Generate a strong n-word passphrase.
+
+words=${1:-5}
+dictionary=${2:-/usr/share/dict/words}
+
+awk < $dictionary \
+    'BEGIN { srand() } /^[a-z]{4,7}$/ { if (rand() <= 0.001) print rand(), $0 }' \
+    | sort \
+    | head -n $words \
+    | cut -d ' ' -f 2 \
+    | tr '\n' '-' \
+    | sed 's/-$//'
