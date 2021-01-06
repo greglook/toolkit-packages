@@ -1,0 +1,19 @@
+;; User-level configuration for the `clojure` and `clj` tools.
+{;; Maven repositories
+ :mvn/repos
+ {"central" {:url "https://repo1.maven.org/maven2/"}
+  "clojars" {:url "https://repo.clojars.org/"}}
+
+ ;; Default Paths
+ :paths ["src"]
+
+ ;; Standard dependencies
+ :deps
+ {org.clojure/clojure {:mvn/version "1.10.1"}}
+
+ ;; Aliases
+ :aliases
+ {;; TODO: draw examples from:
+  ;; https://github.com/seancorfield/dot-clojure/blob/develop/deps.edn
+  ;; https://github.com/practicalli/clojure-deps-edn/blob/live/deps.edn
+  ,,,}}
