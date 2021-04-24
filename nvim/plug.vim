@@ -26,6 +26,7 @@ Plug 'cespare/vim-toml', {'for': 'toml'}
 Plug 'docker/docker', {'for': 'docker', 'rtp': '/contrib/syntax/vim/'}
 Plug 'solarnz/thrift.vim', {'for': 'thrift'}
 Plug 'b4b4r07/vim-hcl', {'for': 'hcl'}
+Plug 'vim-scripts/ebnf.vim'
 Plug 'chr4/nginx.vim'
 
 call plug#end()
