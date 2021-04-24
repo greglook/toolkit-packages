@@ -244,7 +244,7 @@ elsif $mode == :clean
   dupe_total = hash_paths.values.reject{|paths| paths.count == 1 }.count
   dupe_index = 0
 
-  hash_paths.each do |digest, duplicates|
+  hash_paths.sort_by {|digest, duplicates| duplicates.min }.each do |digest, duplicates|
     next if duplicates.size <= 1
     dupe_index += 1
 
