@@ -48,6 +48,6 @@ else
 fi
 
 # Search directories for fully ignored dirs.
-for dir in "$SEARCH_DIRS"; do
+for dir in $SEARCH_DIRS; do
   traverse-dir "$dir"
 done

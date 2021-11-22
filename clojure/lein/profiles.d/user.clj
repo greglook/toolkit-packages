@@ -1,6 +1,15 @@
 {:signing
  {:gpg-key "greg@mvxcvi.com"}
 
+ :aliases
+ {#_#_
+  "kaocha" ["update-in" ":dependencies" "conj"
+            "[org.clojure/test.check \"1.1.0\"]"
+            "[lambdaisland/kaocha \"1.0.829\"]"
+            "[mvxcvi/puget \"1.3.1\"]"
+            "--"
+            "run" "-m" "kaocha.runner"]}
+
  :plugins
  [[org.clojure/clojure "1.10.1"]
   [mvxcvi/whidbey "2.2.1"]

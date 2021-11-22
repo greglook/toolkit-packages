@@ -11,6 +11,7 @@ let g:clojure_syntax_keywords = {
 
 " Increase max lines for indent tracking
 let g:clojure_maxlines = 10000
+let g:paredit_maxlines = 10000
 
 " Shortcut to fix the current file
 nnoremap <leader>cs :call cljstyle#fix()<cr>
