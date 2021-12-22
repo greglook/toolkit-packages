@@ -21,6 +21,9 @@ augroup filetypedetect
   au! BufNewFile,BufRead *.md set filetype=markdown
   au! BufNewFile,BufRead README set filetype=markdown
 
+  " nftables
+  au! BufNewFile,BufRead *.nft set filetype=nftables
+
   " python
   au! BufNewFile,BufRead *.aurora set filetype=python
 
