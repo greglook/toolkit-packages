@@ -9,7 +9,7 @@ let g:clojure_syntax_keywords = {
     \                 "qualified-ident?", "qualified-keyword?", "qualified-symbol?",
     \                 "parse-boolean", "parse-double", "parse-long", "parse-uuid",
     \                 "random-uuid", "abs", "update-keys", "update-vals", "iteration",
-    \                 "swap-vals!", "requiring-resolve", "ex-cause", "ex-message"]
+    \                 "swap-vals!", "reset-vals!", "requiring-resolve", "ex-cause", "ex-message"]
     \ }
 
 " Increase max lines for indent tracking

@@ -11,17 +11,16 @@
             "run" "-m" "kaocha.runner"]}
 
  :plugins
- [[org.clojure/clojure "1.10.1"]
+ [[org.clojure/clojure "1.11.1"]
   [mvxcvi/whidbey "2.2.1"]
-  [lein-ancient "0.6.15"]
+  [lein-ancient "0.7.0"]
   [lein-codox "0.10.7"]
   [lein-cprint "1.3.3"]
   [lein-hiera "1.1.0"]
-  ;[lein-nvd "1.1.1" :exclusions [org.slf4j/slf4j-api org.slf4j/jcl-over-slf4j]]
   [lein-vanity "0.2.0"]
   [lein-cloverage "1.2.1"]
   [lein-collisions "0.1.4"]
-  ;[lein-marginalia "0.9.1"]
+  #_[lein-marginalia "0.9.1"]
   [lein-shell "0.5.0"]
   [com.jakemccrary/lein-test-refresh "0.24.1"]
   [venantius/yagni "0.1.7" :exclusions [org.clojure/tools.logging]]
@@ -61,6 +60,8 @@
               java.time.ZoneOffset {'time/zone-offset str}
               java.time.ZonedDateTime {'time/zoned-date-time str}
               'org.joda.time.DateTime {'joda/inst str}
+              'org.joda.time.LocalDate {'joda/local-date str}
+              'org.joda.time.LocalDateTime {'joda/local-date-time str}
               'org.joda.time.UTCDateTimeZone {'joda/zone str}}}
 
  :hiera
