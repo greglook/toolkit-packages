@@ -3,9 +3,12 @@
 " Call out newer functions in clojure.core
 let g:clojure_syntax_keywords = {
     \ 'clojureMacro': ["defproject"],
-    \ 'clojureFunc': ["any?", "bytes?", "inst?", "uuid?", "boolean?", "pos-int?", "nat-int?",
+    \ 'clojureFunc': ["any?", "boolean?", "bytes?", "inst?", "uuid?", "uri?",
+    \                 "pos-int?", "nat-int?", "NaN?", "infinite?",
     \                 "simple-ident?", "simple-keyword?", "simple-symbol?",
     \                 "qualified-ident?", "qualified-keyword?", "qualified-symbol?",
+    \                 "parse-boolean", "parse-double", "parse-long", "parse-uuid",
+    \                 "random-uuid", "abs", "update-keys", "update-vals", "iteration",
     \                 "swap-vals!", "requiring-resolve", "ex-cause", "ex-message"]
     \ }
 
