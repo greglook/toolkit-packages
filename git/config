@@ -34,6 +34,9 @@
     interactive = auto
     status = auto
 
+[init]
+    defaultBranch = main
+
 [fetch]
     prune = true
 
