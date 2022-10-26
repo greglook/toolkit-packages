@@ -21,19 +21,11 @@ export HISTFILE=~/.histfile
 export HISTSIZE=1000
 export SAVEHIST=1000
 
-
-
-##### PATH SETTINGS #####
-
-# local user path dirs
-export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
-
 # ensure path only contains unique entries
-typeset -U path
+typeset -U PATH path
 
 
-
-##### UTILITY FUNCTIONS #####
+##### ENVIRONMENT MODULES #####
 
 # sources all regular files in the given directory, if it exists.
 load_configs() {
@@ -43,9 +35,8 @@ load_configs() {
     fi
 }
 
-
-
-##### ENVIRONMENT MODULES #####
-
 # load additional configuration
 load_configs "$HOME/.zsh/env.d"
+
+# prepend user path dirs
+path=("$HOME/.local/bin" $path)
