@@ -136,3 +136,21 @@ filetype plugin indent on
 
 " disable syntax error highlighting of C++ keywords in Java files
 let java_allow_cpp_keywords = 1
+
+
+" ----- UTILITIES -----
+
+function! SynStack()
+  if !exists("*synstack")
+    return
+  endif
+  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+endfunc
+
+function! SynGroup()
+    let l:s = synID(line('.'), col('.'), 1)
+    echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+endfun
+
+nnoremap <leader>us :call SynStack()<cr>
+nnoremap <leader>ug :call SynGroup()<cr>

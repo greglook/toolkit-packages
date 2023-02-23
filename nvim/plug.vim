@@ -22,6 +22,7 @@ Plug 'raymond-w-ko/vim-niji', {'for': 'clojure'}
 Plug 'kovisoft/paredit', {'for': 'clojure'}
 
 " Other syntax
+Plug 'greglook/vim-nftables', {'for': 'nft'}
 Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'cespare/vim-toml', {'for': 'toml'}
 Plug 'docker/docker', {'for': 'docker', 'rtp': '/contrib/syntax/vim/'}
