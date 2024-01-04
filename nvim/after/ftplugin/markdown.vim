@@ -11,3 +11,5 @@ endfunction
 
 setlocal foldexpr=MarkdownLevel()
 setlocal foldmethod=expr
+
+let g:markdown_fenced_languages = ['html', 'python', 'lua', 'vim', 'typescript', 'javascript', 'clojure']
