@@ -22,3 +22,12 @@ set show-all-if-unmodified on
 # enable Alt-arrows
 "\e[1;3D": backward-word
 "\e[1;3C": forward-word
+
+# fix disappearing repl prompts
+$if clojure
+    set enable-bracketed-paste off
+$endif
+
+$if bb
+    set enable-bracketed-paste off
+$endif
