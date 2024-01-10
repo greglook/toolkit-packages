@@ -60,6 +60,7 @@
               java.time.ZoneRegion {'time/zone-region str}
               java.time.ZoneOffset {'time/zone-offset str}
               java.time.ZonedDateTime {'time/zoned-date-time str}
+              'multiformats.hash.Multihash {'multi/hash str}
               'org.joda.time.DateTime {'joda/inst str}
               'org.joda.time.LocalDate {'joda/local-date str}
               'org.joda.time.LocalDateTime {'joda/local-date-time str}

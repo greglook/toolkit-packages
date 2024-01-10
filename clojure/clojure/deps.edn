@@ -27,7 +27,7 @@
    :main-opts ["-m" "antq.core"]}
 
   :project/hiera
-  {:extra-deps {com.mvxcvi/clj-hiera {:local/root "/home/user/dev/clj-hiera/clj-hiera"}}
+  {:extra-deps {com.mvxcvi/clj-hiera {:local/root "/home/user/dev/clojure/clj-hiera/clj-hiera"}}
    :main-opts ["-m" "hiera.main"]}
 
   ,,,}}
