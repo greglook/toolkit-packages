@@ -1,17 +1,14 @@
-" Vim settings for Ledger files.
+let g:beancount_separator_col = 65
 
-" General vim settings
-set textwidth=100
+" Shortcuts to align amounts
+nnoremap <buffer> <leader>= :AlignCommodity<CR>
+vnoremap <buffer> <leader>= :AlignCommodity<CR>
 
-" Link insertion macro
-let @l=':read !random 16i    ; link: '
-let @t=':read !random 16i        ; transfer: '
-
-" Ledger plugin settings
-let g:ledger_date_format = '%Y-%m-%d'
+" Automatically align amounts when typing a decimal
+inoremap <buffer> . .<C-\><C-O>:AlignCommodity<CR>
 
 " Fold settings
-function LedgerFoldLevel()
+function BeancountFoldLevel()
     let h = matchstr(getline(v:lnum), '^;; ==\+')
     if empty(h)
         return '='
@@ -20,7 +17,7 @@ function LedgerFoldLevel()
     endif
 endfunction
 
-function! LedgerFoldText()
+function! BeancountFoldText()
     " Count the number of transactions in the fold
     let lnum = v:foldstart + 1
     let txcnt = 0
@@ -58,5 +55,5 @@ function! LedgerFoldText()
 endfunction
 
 setlocal foldmethod=expr
-setlocal foldexpr=LedgerFoldLevel()
-setlocal foldtext=LedgerFoldText()
+setlocal foldexpr=BeancountFoldLevel()
+setlocal foldtext=BeancountFoldText()
