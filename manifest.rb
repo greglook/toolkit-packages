@@ -17,3 +17,6 @@ package 'git',  :when => installed?('git'),  :into => '.config/git'
 # programming languages
 package 'clojure', :when => installed?('lein'),           :dotfiles => true
 package 'rbenv',   :when => file?(ENV['HOME'], '.rbenv'), :dotfiles => true
+
+# other
+package 'finance', :when => installed?('ledger'), :dotfiles => true

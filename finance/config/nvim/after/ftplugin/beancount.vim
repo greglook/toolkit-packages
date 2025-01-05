@@ -1,3 +1,6 @@
+" Beancount file options
+
+" Beancount plugin options
 let g:beancount_separator_col = 65
 
 " Shortcuts to align amounts
@@ -6,6 +9,10 @@ vnoremap <buffer> <leader>= :AlignCommodity<CR>
 
 " Automatically align amounts when typing a decimal
 inoremap <buffer> . .<C-\><C-O>:AlignCommodity<CR>
+
+" Other commands
+nnoremap <buffer> <leader>c :make<CR>
+nnoremap <buffer> <leader>i :GetContext<CR>
 
 " Fold settings
 function BeancountFoldLevel()
@@ -20,11 +27,16 @@ endfunction
 function! BeancountFoldText()
     " Count the number of transactions in the fold
     let lnum = v:foldstart + 1
-    let txcnt = 0
+    let counts = {}
 
     while lnum <= v:foldend
-        if getline(lnum) =~ '^\d\d\d\d-\d\d-\d\d '
-            let txcnt += 1
+        let line = getline(lnum)
+        let m = matchstr(line, '^\d\d\d\d-\d\d-\d\d \+\zs\S\+\ze')
+        if !empty(m)
+            if m == '*' || m == '!' || m =~ '^"'
+                let m = 'txn'
+            endif
+            let counts[m] = (has_key(counts, m) ? counts[m] : 0) + 1
         endif
         let lnum += 1
     endwhile
@@ -39,8 +51,13 @@ function! BeancountFoldText()
     let ltext = substitute(getline(v:foldstart), '\(^;;\s\+\|\s\+=*\s*$\)', '', 'g')
     let lwidth = strdisplaywidth(ltext)
 
-    " Right text shows transaction count
-    let rtext = printf(' %d txn ', txcnt)
+    " Right text shows directive counts
+    let rtext = ''
+    for k in sort(keys(counts))
+        let rtext .= printf(' %d %s', counts[k], k)
+    endfor
+    let rtext .= ' '
+
     let rwidth = strdisplaywidth(rtext)
 
     let foldtext = ltext . ' '
