@@ -8,7 +8,8 @@ let g:clojure_syntax_keywords = {
     \                 "simple-ident?", "simple-keyword?", "simple-symbol?",
     \                 "qualified-ident?", "qualified-keyword?", "qualified-symbol?",
     \                 "parse-boolean", "parse-double", "parse-long", "parse-uuid",
-    \                 "random-uuid", "abs", "update-keys", "update-vals", "iteration",
+    \                 "random-uuid", "abs", "update-keys", "update-vals",
+    \                 "halt-when", "iteration",
     \                 "swap-vals!", "reset-vals!", "requiring-resolve", "ex-cause", "ex-message"]
     \ }
 
