@@ -32,6 +32,10 @@ Plug 'b4b4r07/vim-hcl', {'for': 'hcl'}
 Plug 'chr4/nginx.vim', {'for': 'nginx'}
 Plug 'vim-scripts/ebnf.vim'
 
+" Colors
+Plug 'folke/tokyonight.nvim'
+Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
+
 call plug#end()
 
 filetype plugin indent on

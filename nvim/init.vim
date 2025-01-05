@@ -19,8 +19,11 @@ endif
 
 " ----- APPEARANCE -----
 
-" custom color scheme
-colorscheme slake
+" color scheme
+set background=dark
+"colorscheme catppuccin-mocha
+"colorscheme tokyonight-night
+colorscheme wildcharm
 
 " enable syntax highlighting
 syntax on
