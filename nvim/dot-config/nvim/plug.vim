@@ -27,7 +27,6 @@ Plug 'ledger/vim-ledger', {'for': 'ledger'}
 Plug 'nathangrigg/vim-beancount', {'for': 'beancount'}
 Plug 'cespare/vim-toml', {'for': 'toml'}
 Plug 'docker/docker', {'for': 'docker', 'rtp': '/contrib/syntax/vim/'}
-Plug 'solarnz/thrift.vim', {'for': 'thrift'}
 Plug 'b4b4r07/vim-hcl', {'for': 'hcl'}
 Plug 'chr4/nginx.vim', {'for': 'nginx'}
 Plug 'vim-scripts/ebnf.vim'

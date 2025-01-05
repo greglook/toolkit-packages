@@ -11,7 +11,7 @@
             "run" "-m" "kaocha.runner"]}
 
  :plugins
- [[org.clojure/clojure "1.11.1"]
+ [#_[org.clojure/clojure "1.11.1"]
   [mvxcvi/whidbey "2.2.1"]
   [lein-ancient "0.7.0"]
   [lein-codox "0.10.7"]

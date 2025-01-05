@@ -9,7 +9,8 @@ scripts I've written over the years.
 Usage
 -----
 You'll need the `stow` tool installed, typically using the system's package
-manager.
+manager. First, clone this repository to a convenient location - I like to use
+`~/.toolkit`. From that directory:
 
 ```shell
 # See what would be done
