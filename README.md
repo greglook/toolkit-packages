@@ -8,8 +8,8 @@ scripts I've written over the years.
 
 Usage
 -----
-You'll need the `stow` tool installed, typically using the system's package
-manager. First, clone this repository to a convenient location - I like to use
+You'll need `stow` 2.4.0 or later installed, typically using the system's package
+manager. Then, clone this repository to a convenient location - I like to use
 `~/.toolkit`. From that directory:
 
 ```shell
