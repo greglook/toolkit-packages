@@ -44,6 +44,10 @@ endfunction
 function! s:hifg(group, c16, ...)
     if a:0 >= 2
         exe "highlight " . a:group . " guifg=" . a:2
+    elseif a:0
+        exe "highlight " . a:group . " guifg=" . s:chooseColor(a:c16, a:1)
+    else
+        exe "highlight " . a:group . " guifg=" . s:chooseColor(a:c16)
     endif
     if a:0
         exe "highlight " . a:group . " ctermfg=" . s:chooseColor(a:c16, a:1)
@@ -101,6 +105,7 @@ call s:hifg("LineNr",        3, 221) | call s:hibg("LineNr",        0, 235)
 call s:hifg("StatusLine",    0, 236) | call s:hibg("StatusLine",    7     )
 call s:hifg("StatusLineNC",  0, 236) | call s:hibg("StatusLineNC",  0     )
 call s:hifg("VertSplit",     7, 232) | call s:hibg("VertSplit",     0, 236)
+call s:hifg("WinSeparator",  7, 232) | call s:hibg("WinSeparator",  0, 236)
 call s:hifg("Folded",       13     ) | call s:hibg("Folded",        5)
 
 
@@ -142,6 +147,8 @@ call s:hifg("Title",        12     )
 call s:hifg("Comment", 6)
 "       *Comment         any comment
 
+call s:hifg("Constant",  6, 37)
+call s:hifg("String",   13)
 "call s:hifg("Constant",  6, s:cyan)
 "       *Constant        any constant
 "        String          a string constant: "this is a string"
@@ -154,6 +161,7 @@ call s:hifg("Comment", 6)
 "       *Identifier      any variable name
 "        Function        function name (also: methods for classes)
 
+call s:hifg("Statement", 6)
 "call s:hifg("Statement", 10, s:green)
 "       *Statement       any statement
 "        Conditional     if, then, else, endif, switch, etc.
@@ -162,6 +170,7 @@ call s:hifg("Comment", 6)
 "        Operator        "sizeof", "+", "*", etc.
 "        Keyword         any other keyword
 "        Exception       try, catch, throw
+call s:hifg("ClojureKeyword", 11)
 
 call s:hifg("PreProc", 6, 81)
 "       *PreProc         generic Preprocessor
