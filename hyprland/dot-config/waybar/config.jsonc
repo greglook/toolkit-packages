@@ -1,0 +1,195 @@
+// Waybar configuration
+// vim: ft=jsonc
+
+[
+// Main monitor bar
+{
+    "output": "DP-3",
+    "layer": "top",
+    "position": "top",
+    //"height": 30,
+    //"width": 1280,
+    "spacing": 4,
+    "reload_style_on_change": true,
+
+    // Module Positions
+
+    "modules-left": [
+        "hyprland/workspaces"
+        //"custom/media"
+    ],
+
+    "modules-center": [
+        "hyprland/window"
+    ],
+
+    "modules-right": [
+        "tray",
+        "idle_inhibitor",
+        "cpu",
+        "memory",
+        //"network",
+        "temperature",
+        "wireplumber",
+        "clock",
+        "custom/power"
+    ],
+
+    // Module Configuration
+
+    "clock": {
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%Y-%m-%d}",
+        "max-length": 11
+    },
+
+    "cpu": {
+        "format": "{usage}% ",
+        "tooltip": false
+    },
+
+    // TODO: try this
+    "custom/media": {
+        "format": "{icon} {text}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "spotify": "",
+            "default": "🎜"
+        },
+        "escape": true,
+        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
+    },
+
+    // FIXME: this doesn't work, figure out why or use a program
+    "custom/power": {
+        "format" : "⏻ ",
+        "tooltip": false,
+        "menu": "on-click",
+        "menu-file": "$HOME/.config/waybar/power-menu.xml",
+        "menu-actions": {
+            "shutdown": "shutdown",
+            "reboot": "reboot",
+            "suspend": "systemctl suspend",
+            "hibernate": "systemctl hibernate"
+        }
+    },
+
+    "hyprland/window": {
+        "separate-outputs": true,
+        "icon": true
+    },
+
+    "hyprland/workspaces": {
+        "format": "<sub>{icon}</sub>\n{windows}",
+        "format-window-separator": " ",
+        "window-rewrite-default": "",
+        "window-rewrite": {
+          "title<.*youtube.*>": "",
+          "class<firefox-esr>": "",
+          "class<firefox-esr> title<.*github.*>": "",
+          "class<com.mitchellh.ghostty>": ""
+        }
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    },
+
+    "memory": {
+        "format": "{}% "
+    },
+
+    "network": {
+        // "interface": "wlp2*", // (Optional) To force the use of this interface
+        "format-wifi": "{essid} ({signalStrength}%) ",
+        "format-ethernet": "{ipaddr}/{cidr} ",
+        "tooltip-format": "{ifname} via {gwaddr} ",
+        "format-linked": "{ifname} (No IP) ",
+        "format-disconnected": "Disconnected ⚠",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}"
+    },
+
+    "temperature": {
+        // "thermal-zone": 2,
+        "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+        "critical-threshold": 80,
+        "format": "{temperatureC}°C {icon}",
+        // "format-critical": "{temperatureC}°C {icon}",
+        "format-icons": ["", "", ""]
+    },
+
+    "tray": {
+        "show-passive-items": true,
+        // "icon-size": 21,
+        "spacing": 10
+    },
+
+    "wireplumber": {
+        "format": "{volume}% {icon}",
+        "format-muted": "",
+        "format-icons": ["", "", ""],
+        //"on-click": "helvum",
+        "on-click-middle": "/home/greg/.config/hypr/script/switch-audio-sink"
+    }
+},
+
+// Side monitor bar
+{
+    "output": "HDMI-A-1",
+    "layer": "top",
+    "position": "top",
+    //"height": 30,
+    //"width": 1280,
+    "spacing": 4,
+    "reload_style_on_change": true,
+
+    // Module Positions
+
+    "modules-left": [
+        "hyprland/workspaces"
+    ],
+
+    "modules-center": [
+        "hyprland/window"
+    ],
+
+    "modules-right": [
+        "clock"
+    ],
+
+    // Module Configuration
+
+    "clock": {
+        "timezones": ["America/Los_Angeles", "UTC"],
+        "format": "{:%H:%M %Z, %A %B %d}",
+        "tooltip": true,
+        "tooltip-format": "{:%Y-%m-%dT%H:%M%z}",
+        "actions": {
+            "on-scroll-up": "tz_up",
+            "on-scroll-down": "tz_down"
+        }
+    },
+
+    "hyprland/window": {
+        "separate-outputs": true,
+        "icon": true
+    },
+
+    "hyprland/workspaces": {
+        "format": "<sub>{icon}</sub>\n{windows}",
+        "format-window-separator": " ",
+        "window-rewrite-default": "",
+        "window-rewrite": {
+          "title<.*youtube.*>": "",
+          "class<firefox-esr>": "",
+          "class<firefox-esr> title<.*github.*>": "",
+          "class<com.mitchellh.ghostty>": ""
+        }
+    }
+}
+]

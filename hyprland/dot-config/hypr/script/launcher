@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+CMD="$1"
+shift
+
+STATE_DIR="${HOME}/.local/state/hyprlaunch"
+LOG_FILE="${STATE_DIR}/launcher.log"
+PID_FILE="${STATE_DIR}/pids/${CMD}.pid"
+mkdir -p "${STATE_DIR}/pids"
+
+# Print the PID of the launcher process which is currently responsible for this
+# command.
+launcher-pid() {
+    if [[ -f "$PID_FILE" ]]; then
+        cat "$PID_FILE"
+    fi
+}
+
+# Clean up while exiting the script.
+cleanup() {
+    if [[ $(launcher-pid) == $$ ]]; then
+        rm -f "$PID_FILE"
+    fi
+    killall "$CMD"
+}
+
+trap cleanup EXIT
+
+# Write our process id to the file.
+echo "$$" > $PID_FILE
+
+while true; do
+    # Kill any existing processes
+    if pgrep "$CMD" 2> /dev/null; then
+        echo "Killing existing $CMD processes..."
+        killall "$CMD" 2> /dev/null
+        sleep 1
+    fi
+
+    # Launch process
+    echo "Launching new $CMD process..."
+    "$CMD" "$@"
+
+    # Prevent runaway restarts
+    echo "Waiting before restarting $CMD..."
+    sleep 1
+
+    # Exit if no longer running Hyprland
+    if ! pgrep Hyprland > /dev/null; then
+        echo "Hyprland no longer running! Exiting launcher for $CMD"
+        exit
+    fi
+
+    # Exit if we're no longer responsible for the command
+    if [[ $(launcher-pid) != $$ ]]; then
+        echo "New launcher $(launcher-pid) has taken responsibility for $CMD, exiting"
+        exit
+    fi
+done

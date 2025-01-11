@@ -1,0 +1,10 @@
+#!/bin/bash
+
+SPEAKERS_OUT="alsa_output.pci-0000_6b_00.6.analog-stereo"
+HEADPHONES_OUT="alsa_output.usb-HP__Inc_HyperX_Cloud_III_Wireless_0000000000000000-00.analog-stereo"
+
+if [[ "$(pactl get-default-sink)" == "$SPEAKERS_OUT" ]]; then
+    pactl set-default-sink "$HEADPHONES_OUT"
+else
+    pactl set-default-sink "$SPEAKERS_OUT"
+fi
