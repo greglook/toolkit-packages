@@ -29,8 +29,8 @@ syn match HyprVar "\$[a-zA-Z][a-zA-Z0-9_]*" display
 highlight link HyprVar Define
 
 " Categories
-syn match HyprCategoryName "\w\+" contained
-syn match HyprCategoryStart "\s*\w\+\s\+{" contains=HyprCategoryName
+syn match HyprCategoryName "[0-9A-Za-z_-]\+" contained
+syn match HyprCategoryStart "^\s*[0-9A-Za-z_-]\+\s\+{" contains=HyprCategoryName
 syn match HyprCategoryEnd "\s*}"
 
 highlight link HyprCategoryName Statement
