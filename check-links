@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+TOOLKIT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TOOLKIT_RELATIVE="${TOOLKIT_ROOT##${HOME}/}"
+
+find-links() {
+    find "$HOME" \
+        -type d \
+        \( \
+            -path "${HOME}/Applications" -or \
+            -path "${HOME}/Desktop" -or \
+            -path "${HOME}/Documents" -or \
+            -path "${HOME}/Downloads" -or \
+            -path "${HOME}/Library" -or \
+            -path "${HOME}/Movies" -or \
+            -path "${HOME}/Music" -or \
+            -path "${HOME}/Pictures" -or \
+            -path "${HOME}/Public" -or \
+            -path "${HOME}/.Trash" \
+        \) \
+        -prune \
+        -or \
+        -type l \
+        \( \
+            -lname "${TOOLKIT_RELATIVE}/*" -or \
+            -lname "*../${TOOLKIT_RELATIVE}/*" \
+        \) \
+        -print
+}
+
+check-links() {
+    while read link; do
+        local relpath="${link##${HOME}/}"
+        local target="$(realpath "$link")"
+        local reltarget="${target##${TOOLKIT_ROOT}/}"
+        if [[ $target == $reltarget ]]; then
+            return
+        fi
+        local package="${reltarget%%/*}"
+        echo -e "${package}\t${relpath}\t${reltarget}"
+    done
+}
+
+print-links() {
+    local current_package=""
+    while read entry; do
+        local package="$(cut -f 1 <<< "$entry")"
+        local relpath="$(cut -f 2 <<< "$entry")"
+        local reltarget="$(cut -f 3 <<< "$entry")"
+        if [[ $current_package != $package ]]; then
+            echo
+            if [[ -d "${TOOLKIT_ROOT}/${package}" ]]; then
+                echo -e "\033[1;36m${package}\033[0m"
+            else
+                echo -e "\033[1;31m${package} (!)\033[0m"
+            fi
+            current_package="$package"
+        fi
+        local pkgtarget="${reltarget#${package}/}"
+        if [[ -f "${TOOLKIT_ROOT}/${reltarget}" ]]; then
+            echo -e "$relpath \033[33m->\033[0m $pkgtarget"
+        else
+            echo -e "$relpath \033[33m->\033[0m \033[31m${pkgtarget} (!)\033[0m"
+        fi
+    done
+}
+
+echo "Finding links to toolkit packages..."
+find-links | check-links | sort | print-links
