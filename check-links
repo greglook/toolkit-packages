@@ -31,7 +31,7 @@ find-links() {
 check-links() {
     while read link; do
         local relpath="${link##${HOME}/}"
-        local target="$(realpath "$link")"
+        local target="$(readlink -m "$link")"
         local reltarget="${target##${TOOLKIT_ROOT}/}"
         if [[ $target == $reltarget ]]; then
             return
