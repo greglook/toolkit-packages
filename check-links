@@ -28,10 +28,18 @@ find-links() {
         -print
 }
 
+resolve-link() {
+    if [[ $(uname) == Darwin ]]; then
+        python3 -c 'import os,sys;print(os.path.realpath(sys.argv[1]))' "$1"
+    else
+        readlink -m "$1"
+    fi
+}
+
 check-links() {
     while read link; do
         local relpath="${link##${HOME}/}"
-        local target="$(readlink -m "$link")"
+        local target="$(resolve-link "$link")"
         local reltarget="${target##${TOOLKIT_ROOT}/}"
         if [[ $target == $reltarget ]]; then
             return
