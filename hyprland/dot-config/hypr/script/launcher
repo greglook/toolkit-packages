@@ -1,59 +1,102 @@
 #!/usr/bin/env bash
 
-CMD="$1"
-shift
+STATE_DIR="${XDG_STATE_HOME:-${HOME}/.local/state}/hyprlaunch"
+LOG_DIR="${STATE_DIR}/log"
+PID_DIR="${STATE_DIR}/pids"
+mkdir -p "$LOG_DIR" "$PID_DIR"
 
-STATE_DIR="${HOME}/.local/state/hyprlaunch"
-LOG_FILE="${STATE_DIR}/launcher.log"
-PID_FILE="${STATE_DIR}/pids/${CMD}.pid"
-mkdir -p "${STATE_DIR}/pids"
+# Log a message from the script
+log() {
+    local label="$1"
+    shift
+    echo "$(date --iso-8601=seconds) $@" >> "${LOG_DIR}/${label}.log"
+}
 
 # Print the PID of the launcher process which is currently responsible for this
 # command.
 launcher-pid() {
-    if [[ -f "$PID_FILE" ]]; then
-        cat "$PID_FILE"
+    local label="$1"
+    local pid_file="${PID_DIR}/${label}.pid"
+    if [[ -f $pid_file ]]; then
+        cat "$pid_file"
     fi
 }
 
 # Clean up while exiting the script.
 cleanup() {
-    if [[ $(launcher-pid) == $$ ]]; then
-        rm -f "$PID_FILE"
+    local label="$1"
+    local cmd="$2"
+    local pid_file="${PID_DIR}/${label}.pid"
+    if [[ $(launcher-pid $label) == $$ ]]; then
+        rm -f "$pid_file"
     fi
-    killall "$CMD"
+    pkill -f "$cmd" -u $USER -P $$ 2> /dev/null
 }
 
-trap cleanup EXIT
+run-service() {
+    local label="$1"
+    local cmd="$2"
+    shift 2
 
-# Write our process id to the file.
-echo "$$" > $PID_FILE
+    trap "cleanup $label $cmd" EXIT
 
-while true; do
-    # Kill any existing processes
-    if pgrep "$CMD" 2> /dev/null; then
-        echo "Killing existing $CMD processes..."
-        killall "$CMD" 2> /dev/null
+    # Write our process id to the file.
+    local pid_file="${PID_DIR}/${label}.pid"
+    echo "$$" > $pid_file
+
+    while true; do
+        # Exit if no longer running Hyprland
+        if ! pgrep Hyprland > /dev/null; then
+            log $label "Hyprland no longer running! Exiting launcher for $label"
+            exit
+        fi
+
+        # Exit if we're no longer responsible for the command
+        local current_pid="$(launcher-pid $label)"
+        if [[ $current_pid != $$ ]]; then
+            log $label "Launcher process $current_pid has taken responsibility for $label, exiting"
+            exit
+        fi
+
+        # Kill any existing processes
+        if pgrep "$cmd" 2> /dev/null; then
+            log $label "Killing existing $label processes..."
+            killall "$cmd" 2> /dev/null
+            sleep 1
+        fi
+
+        # Launch process
+        log $label "Launching new $label process..."
+        "$cmd" "$@" 2>&1 >> "$LOG_DIR/${label}.log"
+
+        local exit_code=$?
+        if [[ $exit_code -ne 0 ]]; then
+            log $label "$label service command exited with failure code $exit_code"
+        fi
+
+        # Prevent runaway restarts
         sleep 1
-    fi
+    done
+}
 
-    # Launch process
-    echo "Launching new $CMD process..."
-    "$CMD" "$@"
+action="$1"
+shift
 
-    # Prevent runaway restarts
-    echo "Waiting before restarting $CMD..."
-    sleep 1
+case $action in
+    run)
+        run-service "$1" "$@"
+        ;;
 
-    # Exit if no longer running Hyprland
-    if ! pgrep Hyprland > /dev/null; then
-        echo "Hyprland no longer running! Exiting launcher for $CMD"
-        exit
-    fi
+    list)
+        pgrep -f "${BASH_SOURCE[0]}" -u $USER -P 1 -a | cut -d ' ' -f 1,4-
+        ;;
 
-    # Exit if we're no longer responsible for the command
-    if [[ $(launcher-pid) != $$ ]]; then
-        echo "New launcher $(launcher-pid) has taken responsibility for $CMD, exiting"
-        exit
-    fi
-done
+    kill)
+        pkill -f "${BASH_SOURCE[0]}" -u $USER -P 1 -e
+        ;;
+
+    *)
+        echo "Unknown action: $action" >&2
+        exit 1
+        ;;
+esac
