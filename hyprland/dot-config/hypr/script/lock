@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+LOG_FILE="${XDG_STATE_DIR:-${HOME}/.local/state}/hyprlaunch/log/hyprlock.log"
+mkdir -p "$(dirname "$LOG_FILE")"
+
+# Don't lock if already running.
+if pidof hyprlock 2>&1 > /dev/null; then
+    echo "$(date --iso-8601=seconds) hyprlock already running, skipping lock" >> "$LOG_FILE"
+    exit
+fi
+
+# Lock screen with hyprlock
+echo -e "\n=== $(date --iso-8601=seconds) Locking screen ===" >> "$LOG_FILE"
+#hyprlock --verbose >> "$LOG_FILE"
+hyprlock >> "$LOG_FILE"
