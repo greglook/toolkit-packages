@@ -1,0 +1,3 @@
+# disable window decoration by default
+window-decoration = false
+keybind = ctrl+shift+w=toggle_window_decorations
