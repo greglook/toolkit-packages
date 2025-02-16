@@ -23,11 +23,6 @@ highlight link HyprResolution Number
 highlight link HyprColor Function
 highlight link HyprHex Constant
 
-" Variables
-syn match HyprVar "\$[a-zA-Z][a-zA-Z0-9_]*" display
-
-highlight link HyprVar Define
-
 " Categories
 syn match HyprCategoryName "[0-9A-Za-z_-]\+" contained
 syn match HyprCategoryStart "^\s*[0-9A-Za-z_-]\+\s\+{" contains=HyprCategoryName
@@ -44,11 +39,18 @@ syn match HyprCommandEquals "=" contained
 highlight link HyprCommandLine Statement
 highlight link HyprCommandEquals Delimiter
 
+" Variables
+" $var = value
+syn match HyprVar "\$[a-zA-Z][a-zA-Z0-9_]*" display
+syn match HyprDefineVar "\(^\s*\)\@24<=\$\S+\s*=.*" contains=HyprCommandEquals,HyprVar,HyprNumber,HyprLogical,HyprColor
+
+highlight link HyprVar Define
+
 " Specific Commands
 
 " monitor = name, resolution, position, scale[, options...]
-syn match HyprCommandMonitor "\(^\s*\)\@24<=monitor\s*=.*" contains=HyprCommandEquals,HyprComma,HyprCommandMonitorName,HyprCommandMonitorKeyword,HyprNumber,HyprResolution,HyprLogical
-syn match HyprCommandMonitorName "\(=\s*\)\@20<=\s*[^,]\+" contained
+syn match HyprCommandMonitor "\(^\s*\)\@24<=monitor\s*=.*" contains=HyprCommandEquals,HyprComma,HyprCommandMonitorName,HyprCommandMonitorKeyword,HyprNumber,HyprResolution,HyprLogical,HyprVar
+syn match HyprCommandMonitorName "\(=\s*\)\@20<=\s*[^,]\+" contained contains=HyprVar
 syn keyword HyprCommandMonitorKeyword contained preferred highres highrr auto auto-right auto-left auto-up auto-down disable transform mirror bitdepth vrr
 
 highlight link HyprCommandMonitor HyprCommandLine
