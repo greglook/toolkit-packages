@@ -24,6 +24,7 @@
     ],
 
     "modules-right": [
+        "hyprland/submap",
         "tray",
         "idle_inhibitor",
         "cpu",
@@ -61,10 +62,11 @@
         "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
     },
 
-    // FIXME: this doesn't work, figure out why or use a program
     "custom/power": {
         "format" : "⏻ ",
         "tooltip": false,
+        "on-click": "wlogout"
+        /*
         "menu": "on-click",
         "menu-file": "$HOME/.config/waybar/power-menu.xml",
         "menu-actions": {
@@ -73,6 +75,7 @@
             "suspend": "systemctl suspend",
             "hibernate": "systemctl hibernate"
         }
+        */
     },
 
     "hyprland/window": {
@@ -90,6 +93,11 @@
           "class<firefox-esr> title<.*github.*>": "",
           "class<com.mitchellh.ghostty>": ""
         }
+    },
+
+    "hyprland/submap": {
+        "format": "sub {}"
+        //"max-length": 8
     },
 
     "idle_inhibitor": {
