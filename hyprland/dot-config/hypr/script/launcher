@@ -86,7 +86,7 @@ run-service() {
         # Check to make sure all dependencies are running
         local waiting_deps=()
         for dep in ${deps[@]}; do
-            if ! pidof "$dep"; then
+            if ! pidof -q "$dep"; then
                 waiting_deps+="$dep"
             fi
         done

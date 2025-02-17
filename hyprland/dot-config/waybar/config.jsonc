@@ -92,6 +92,9 @@
           "class<firefox-esr>": "",
           "class<firefox-esr> title<.*github.*>": "",
           "class<com.mitchellh.ghostty>": ""
+        },
+        "persistent-workspaces": {
+            "DP-3": [1, 2, 3, 4, 5]
         }
     },
 
