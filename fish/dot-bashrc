@@ -1,0 +1,4 @@
+# Activate fish shell
+if [[ $- == *i* && -x /usr/bin/fish && ! -f ~/.no-fish ]]; then
+    exec /usr/bin/fish
+fi
