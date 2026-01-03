@@ -1,0 +1,9 @@
+#:schema https://jj-vcs.github.io/jj/latest/config-schema.json
+
+[user]
+name = "Greg Look"
+email = "greg@gslook.net"
+
+[ui]
+editor = "nvim"
+default-command = "log"
