@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# Generate a secure random string of a certain length.
+
+cat /dev/random | tr -dC '[:alnum:]' | head -c ${1:-32} | tr '[:upper:]' '[:lower:]'
+echo
