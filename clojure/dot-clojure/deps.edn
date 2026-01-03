@@ -5,19 +5,18 @@
   "clojars" {:url "https://repo.clojars.org/"}}
 
  ;; Default Paths
- :paths ["src"]
+ ;; :paths ["src"]
 
  ;; Standard dependencies
  :deps
- {org.clojure/clojure {:mvn/version "1.11.1"}}
+ {org.clojure/clojure {:mvn/version "1.12.0"}}
 
  ;; Aliases
+ ;; TODO: draw examples from:
+ ;; https://github.com/seancorfield/dot-clojure/blob/develop/deps.edn
+ ;; https://github.com/practicalli/clojure-deps-edn/blob/live/deps.edn
  :aliases
- {;; TODO: draw examples from:
-  ;; https://github.com/seancorfield/dot-clojure/blob/develop/deps.edn
-  ;; https://github.com/practicalli/clojure-deps-edn/blob/live/deps.edn
-
-  :project/check
+ {:project/check
   {:extra-deps {athos/clj-check {:git/url "https://github.com/athos/clj-check.git"
                                  :sha "0ca84df1357d71429243b99908303f45a934654c"}}
    :main-opts ["-m" "clj-check.check"]}
@@ -30,4 +29,15 @@
   {:extra-deps {com.mvxcvi/clj-hiera {:local/root "/home/user/dev/clojure/clj-hiera/clj-hiera"}}
    :main-opts ["-m" "hiera.main"]}
 
-  ,,,}}
+  :mcp/server
+  {:deps {org.slf4j/slf4j-nop {:mvn/version "2.0.16"}
+          com.bhauman/clojure-mcp {:git/url "https://github.com/bhauman/clojure-mcp.git"
+                                   :git/sha "b74f90d139c40e76dbcf9530ec6cbbc9d375592b"}}
+     :exec-fn clojure-mcp.main/start-mcp-server
+     :exec-args {:port 7888}}
+
+  :mcp/nrepl
+  {:extra-paths ["test"]
+   :extra-deps {nrepl/nrepl {:mvn/version "1.3.1"}}
+   :jvm-opts ["-Djdk.attach.allowAttachSelf"]
+   :main-opts ["-m" "nrepl.cmdline" "--port" "7888"]}}}

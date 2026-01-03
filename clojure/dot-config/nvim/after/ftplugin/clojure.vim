@@ -1,6 +1,7 @@
 " Vim settings for Clojure files.
 
 " Call out newer functions in clojure.core
+" TODO: see if I can prune these now
 let g:clojure_syntax_keywords = {
     \ 'clojureMacro': ["defproject"],
     \ 'clojureFunc': ["any?", "boolean?", "bytes?", "inst?", "uuid?", "uri?",
@@ -33,3 +34,7 @@ nnoremap <leader>cs :call CljstyleFix()<cr>
 " FIXME: use cljstyle for formatting
 "setlocal equalprg=cljstyle\ pipe
 "nnoremap <leader>cs gg=G''<cr>
+
+" Kaocha has issues with nvim's default backupcopy=auto setting
+" https://github.com/lambdaisland/kaocha/issues/277
+set backupcopy=yes
