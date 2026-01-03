@@ -11,5 +11,4 @@ fi
 
 # Lock screen with hyprlock
 echo -e "\n=== $(date --iso-8601=seconds) Locking screen ===" >> "$LOG_FILE"
-#hyprlock --verbose >> "$LOG_FILE"
-hyprlock >> "$LOG_FILE"
+hyprlock --verbose >> "$LOG_FILE"

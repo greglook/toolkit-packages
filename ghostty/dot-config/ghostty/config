@@ -1,3 +1,6 @@
 # disable window decoration by default
 window-decoration = false
 keybind = ctrl+shift+w=toggle_window_decorations
+
+# fullscreen haxin
+keybind = ctrl+shift+f=toggle_fullscreen

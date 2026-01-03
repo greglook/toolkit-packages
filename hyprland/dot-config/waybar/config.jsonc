@@ -23,8 +23,8 @@
         "hyprland/window"
     ],
 
+    // TODO: move some of these to side monitor and bump down window title?
     "modules-right": [
-        "hyprland/submap",
         "tray",
         "idle_inhibitor",
         "cpu",
@@ -98,11 +98,6 @@
         }
     },
 
-    "hyprland/submap": {
-        "format": "sub {}"
-        //"max-length": 8
-    },
-
     "idle_inhibitor": {
         "format": "{icon}",
         "format-icons": {
@@ -170,6 +165,7 @@
     ],
 
     "modules-right": [
+        "hyprland/submap",
         "clock"
     ],
 
@@ -184,6 +180,11 @@
             "on-scroll-up": "tz_up",
             "on-scroll-down": "tz_down"
         }
+    },
+
+    "hyprland/submap": {
+        "format": "::{}::"
+        //"max-length": 8
     },
 
     "hyprland/window": {
