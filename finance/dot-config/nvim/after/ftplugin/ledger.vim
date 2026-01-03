@@ -4,8 +4,8 @@
 set textwidth=100
 
 " Link insertion macro
-let @l=':read !random 16i    ; link: '
-let @t=':read !random 16i        ; transfer: '
+let @l=':read !randstr 32i    ; link: '
+let @t=':read !randstr 32i        ; transfer: '
 
 " Ledger plugin settings
 let g:ledger_date_format = '%Y-%m-%d'
