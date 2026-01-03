@@ -1,0 +1,24 @@
+# Bash login shell configuration
+
+### Environment ###
+
+# Add local bin path
+export PATH="${HOME}/.local/bin:${PATH}"
+
+# Set standard XDG variables
+export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_CACHE_HOME="${HOME}/.cache"
+export XDG_STATE_HOME="${HOME}/.local/state"
+export XDG_DATA_HOME="${HOME}/.local/share"
+
+# Keep NPM from polluting /usr
+export NPM_CONFIG_PREFIX="${HOME}/.local/"
+
+
+### Interactive Config ###
+
+# This file is sourced by bash for login shells.  The following line
+# runs your .bashrc and is recommended by the bash info pages.
+if [[ -f ~/.bashrc ]] ; then
+	. ~/.bashrc
+fi

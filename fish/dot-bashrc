@@ -1,4 +1,17 @@
+# This file is sourced by all *interactive* bash shells on startup.
+
+# Test for an interactive shell.  There is no need to set anything
+# past this point for scp and rcp, and it's important to refrain from
+# outputting anything in those cases.
+if [[ $- != *i* ]] ; then
+	# Shell is non-interactive.  Be done now!
+	return
+fi
+
+# Put history file in XDG dir
+export HISTFILE="${XDG_STATE_HOME}/bash/history"
+
 # Activate fish shell
-if [[ $- == *i* && -x /usr/bin/fish && ! -f ~/.no-fish ]]; then
-    exec /usr/bin/fish
+if [[ -x /usr/bin/fish && -z $NO_FISH && ! -f $HOME/.no-fish ]]; then
+    exec fish
 fi
