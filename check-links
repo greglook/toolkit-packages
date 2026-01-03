@@ -52,16 +52,23 @@ check-links() {
 print-links() {
     local current_package=""
     while read entry; do
-        local package="$(cut -f 1 <<< "$entry")"
-        local relpath="$(cut -f 2 <<< "$entry")"
-        local reltarget="$(cut -f 3 <<< "$entry")"
+        local package relpath reltarget
+        IFS=$'\t' read package relpath reltarget <<< "$entry"
         if [[ $current_package != $package ]]; then
             echo
             if [[ -d "${TOOLKIT_ROOT}/${package}" ]]; then
                 echo -e "\033[1;36m${package}\033[0m"
-                while read missing; do
-                    echo -e "\033[33m${missing}\033[0m"
-                done < <(stow -nv $package 2>&1 | grep LINK: | cut -d ' ' -f 2)
+                while read line; do
+                    if [[ $line == LINK:\ * ]]; then
+                        local missing="${line#LINK: }"
+                        missing="${missing%% *}"
+                        echo -e "\033[33m${missing}\033[0m \033[90m(missing)\033[0m"
+                    elif [[ $line == *cannot\ stow\ *\ over\ existing\ target* ]]; then
+                        local conflict="${line#* over existing target }"
+                        conflict="${conflict%% *}"
+                        echo -e "\033[31m${conflict}\033[0m \033[90m(conflict)\033[0m"
+                    fi
+                done < <(stow -nv "$package" 2>&1)
             else
                 echo -e "\033[1;31m${package} (!)\033[0m"
             fi
@@ -71,7 +78,7 @@ print-links() {
         if [[ -f "${TOOLKIT_ROOT}/${reltarget}" ]]; then
             echo -e "\033[32m${relpath}\033[0m"
         else
-            echo -e "\033[31m${relpath}\033[0m"
+            echo -e "\033[31m${relpath}\033[0m \033[90m(broken)\033[0m"
         fi
     done
 }
