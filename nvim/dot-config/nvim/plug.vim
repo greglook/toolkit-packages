@@ -12,7 +12,6 @@
 call plug#begin(stdpath('data') . '/plugs')
 
 " General
-Plug 'folke/tokyonight.nvim'
 Plug 'machakann/vim-sandwich'
 Plug 'scrooloose/nerdtree', {'on': 'NERDTreeToggle'}
 Plug 'mzlogin/vim-markdown-toc', {'for': 'markdown'}
