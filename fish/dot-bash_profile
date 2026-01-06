@@ -11,8 +11,12 @@ export XDG_CACHE_HOME="${HOME}/.cache"
 export XDG_STATE_HOME="${HOME}/.local/state"
 export XDG_DATA_HOME="${HOME}/.local/share"
 
-# Keep NPM from polluting /usr
-export NPM_CONFIG_PREFIX="${HOME}/.local/"
+# Put history file in XDG dir
+export HISTFILE="${XDG_STATE_HOME}/bash/history"
+if [[ ! -f $HISTFILE ]]; then
+    mkdir -p $(dirname $HISTFILE)
+    touch $HISTFILE
+fi
 
 
 ### Interactive Config ###

@@ -8,9 +8,6 @@ if [[ $- != *i* ]] ; then
 	return
 fi
 
-# Put history file in XDG dir
-export HISTFILE="${XDG_STATE_HOME}/bash/history"
-
 # Activate fish shell
 if [[ -x /usr/bin/fish && -z $NO_FISH && ! -f $HOME/.no-fish ]]; then
     exec fish
