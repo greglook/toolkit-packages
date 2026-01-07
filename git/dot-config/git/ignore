@@ -5,3 +5,5 @@
 .DS_Store
 .DS_Store?
 .Trashes
+
+**/.claude/settings.local.json
