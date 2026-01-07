@@ -8,12 +8,21 @@ set -gx XDG_CONFIG_HOME $HOME/.config
 set -gx XDG_STATE_HOME $HOME/.local/state
 set -gx XDG_DATA_HOME $HOME/.local/share
 
+# Ansible
+set -gx ANSIBLE_HOME $XDG_DATA_HOME/ansible
+
 # AWS CLI
 set -gx AWS_CONFIG_FILE $XDG_CONFIG_HOME/aws/config
 set -gx AWS_SHARED_CREDENTIALS_FILE $XDG_CONFIG_HOME/aws/credentials
 
+# Claude Code
+set -gx CLAUDE_CONFIG_DIR $XDG_CONFIG_HOME/claude
+
 # Clojure
 set -gx GITLIBS $XDG_STATE_HOME/clojure/gitlibs
+
+# CUDA
+set -gx CUDA_CACHE_PATH $XDG_CACHE_HOME/nv
 
 # GPG
 set -gx GNUPGHOME $XDG_DATA_HOME/gnupg
@@ -29,6 +38,9 @@ set -gx NPM_CONFIG_TMP $XDG_RUNTIME_DIR/npm
 
 # Sqlite
 set -gx SQLITE_HISTORY $XDG_CACHE_HOME/sqlite_history
+
+# W3M
+set -gx W3M_DIR $XDG_DATA_HOME/w3m
 
 # wget
 alias wget="wget --hsts-file=$XDG_DATA_HOME/wget-hsts"
