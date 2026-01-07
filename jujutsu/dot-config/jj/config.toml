@@ -1,8 +1,8 @@
-#:schema https://jj-vcs.github.io/jj/latest/config-schema.json
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
 
 [user]
 name = "Greg Look"
-email = "greg@gslook.net"
+email = "greg@greglook.me"
 
 [ui]
 editor = "nvim"
